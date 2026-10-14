@@ -1,0 +1,46 @@
+{{!
+    @template mod_dictogloss/variants_overview
+    Clustered reconstruction variants grouped by sentence.
+}}
+<div class="mod-dictogloss-variants">
+    {{#hasslots}}
+        {{#slots}}
+            <div class="card mb-3 mod-dictogloss-slot">
+                <div class="card-header d-flex justify-content-between align-items-start gap-2">
+                    <div class="mod-dictogloss-anchor">{{#hasanchor}}<span class="visually-hidden">{{anchorlabel}}:</span>{{anchor}}{{/hasanchor}}{{^hasanchor}}{{additionallabel}}{{/hasanchor}}</div>
+                    <div class="d-flex align-items-center gap-2 text-nowrap">
+                        <span class="badge text-bg-secondary">{{optioncount}} {{distinctlabel}} &middot; {{totalcount}} {{responseslabel}}</span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mod-dictogloss-focusbtn"
+                                aria-pressed="false">{{focuslabel}}</button>
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {{#options}}
+                        <li class="list-group-item" data-optionindex="{{optionindex}}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="mod-dictogloss-option-text">{{#hascolor}}<span class="visually-hidden">{{#str}}similaritylabel, mod_dictogloss{{/str}} {{score}}%.</span>{{/hascolor}}{{#words}}<span class="dictogloss-word dictogloss-word-{{status}}">{{text}}</span>{{/words}}</span>
+                                <span class="text-nowrap ms-3">
+                                    <span class="badge text-bg-primary" title="{{count}} {{responseslabel}}" aria-label="{{count}} {{responseslabel}}">{{count}}</span>
+                                </span>
+                            </div>
+                            {{#hasauthors}}
+                                <div class="mod-dictogloss-authors mt-2">
+                                    <span class="visually-hidden">{{#str}}contributors, mod_dictogloss{{/str}}:</span>
+                                    {{#authors}}
+                                        <span class="badge rounded-pill text-bg-light border">{{name}}{{#group}} <span class="text-muted">&middot; {{group}}</span>{{/group}}</span>
+                                    {{/authors}}
+                                    {{#moreauthors}}
+                                        <span class="badge rounded-pill text-bg-light border">+{{.}}</span>
+                                    {{/moreauthors}}
+                                </div>
+                            {{/hasauthors}}
+                        </li>
+                    {{/options}}
+                </ul>
+            </div>
+        {{/slots}}
+    {{/hasslots}}
+    {{^hasslots}}
+        <p class="text-muted">{{#str}}nosubmission, mod_dictogloss{{/str}}</p>
+    {{/hasslots}}
+</div>

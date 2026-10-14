@@ -1,0 +1,66 @@
+{{!
+    @template mod_dictogloss/monitor
+    Teacher monitor of all contributions at any stage.
+}}
+<div class="mod-dictogloss-monitor">
+    {{#hasrows}}
+        <form method="post" action="{{bulkaction}}">
+            <input type="hidden" name="id" value="{{cmid}}">
+            <input type="hidden" name="group" value="{{groupfilter}}">
+            <input type="hidden" name="action" value="deleteselected">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="mod-dictogloss-selectall"
+                                       data-dictogloss-selectall=".mod-dictogloss-select"
+                                       aria-label="{{#str}}selectall, mod_dictogloss{{/str}}">
+                            </th>
+                            <th>{{#str}}participant, mod_dictogloss{{/str}}</th>
+                            <th>{{#str}}submission, mod_dictogloss{{/str}}</th>
+                            <th>{{#str}}lastmodified, mod_dictogloss{{/str}}</th>
+                            <th>{{#str}}keywords, mod_dictogloss{{/str}}</th>
+                            <th>{{#str}}reconstruction, mod_dictogloss{{/str}}</th>
+                            <th>{{#str}}autograde, mod_dictogloss{{/str}}</th>
+                            <th>{{#str}}grade, mod_dictogloss{{/str}}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#rows}}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="mod-dictogloss-select"
+                                           name="selected[]" value="{{userid}}" aria-label="{{fullname}}">
+                                </td>
+                                <td>{{fullname}}</td>
+                                <td>{{statuslabel}}</td>
+                                <td>{{timemodified}}</td>
+                                <td><small>{{keywords}}</small></td>
+                                <td><small>{{reconstruction}}</small></td>
+                                <td>{{autograde}}</td>
+                                <td>
+                                    {{grade}}
+                                    {{#overridden}}<span class="badge text-bg-info">{{#str}}gradeoverridden, mod_dictogloss{{/str}}</span>{{/overridden}}
+                                </td>
+                                <td class="text-nowrap">
+                                    <a href="{{url}}" class="btn btn-sm btn-outline-secondary">
+                                        {{#str}}viewcontribution, mod_dictogloss{{/str}}
+                                    </a>
+                                </td>
+                            </tr>
+                        {{/rows}}
+                    </tbody>
+                </table>
+            </div>
+            <input type="submit" class="btn btn-outline-danger"
+                   value="{{#str}}deleteselected, mod_dictogloss{{/str}}"
+                   data-dictogloss-confirm="{{#str}}deleteselected_confirm, mod_dictogloss{{/str}}">
+        </form>
+    {{/hasrows}}
+    {{^hasrows}}
+        <p class="text-muted">{{#str}}nosubmission, mod_dictogloss{{/str}}</p>
+    {{/hasrows}}
+</div>

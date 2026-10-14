@@ -1,0 +1,22 @@
+{{!
+    @template mod_dictogloss/results_summary
+    Results filter and summary tiles.
+}}
+<form method="get" action="{{formaction}}" class="d-flex align-items-center gap-2 mb-4">
+    <input type="hidden" name="id" value="{{cmid}}">
+    <label for="mod-dictogloss-results-filter" class="mb-0">{{filterlabel}}</label>
+    <select name="{{filtername}}" id="mod-dictogloss-results-filter" class="form-select w-auto">
+        {{#options}}
+            <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+        {{/options}}
+    </select>
+    <button type="submit" class="btn btn-outline-secondary">{{applylabel}}</button>
+</form>
+<div class="mod-dictogloss-results-summary d-flex flex-wrap gap-3 mb-4">
+    {{#stats}}
+        <div class="border rounded px-3 py-2 text-center">
+            <div class="h4 mb-0"><strong>{{value}}</strong></div>
+            <div class="small text-muted">{{label}}</div>
+        </div>
+    {{/stats}}
+</div>

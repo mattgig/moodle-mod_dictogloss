@@ -1,0 +1,20 @@
+{{!
+    @template mod_dictogloss/audio_player
+    Audio player(s) with an optional intro.
+
+    Example context (json):
+    {
+        "label": "Listen again",
+        "intro": "When ready, start the reconstruction.",
+        "hassintro": true,
+        "classes": "mb-4",
+        "urls": ["https://example.com/pluginfile.php/1/mod_dictogloss/audio/0/text.mp3"]
+    }
+}}
+<div class="mod-dictogloss-audio {{classes}}">
+    <p>{{label}}</p>
+    {{#hassintro}}<p class="text-muted">{{intro}}</p>{{/hassintro}}
+    {{#urls}}
+        <audio controls src="{{.}}"></audio>
+    {{/urls}}
+</div>

@@ -1,0 +1,73 @@
+{{!
+    @template mod_dictogloss/live_controls
+    Live control switches and the random teams overview.
+}}
+<p class="text-muted">{{intro}}</p>
+
+<form method="post" action="{{formaction}}" class="mod-dictogloss-flow">
+    <input type="hidden" name="id" value="{{cmid}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    {{#switches}}
+        <div class="form-check form-switch mb-3">
+            <input type="checkbox" name="{{name}}" value="1" {{#checked}}checked{{/checked}}
+                   id="mod-dictogloss-flow-{{name}}" class="form-check-input" role="switch">
+            <label for="mod-dictogloss-flow-{{name}}" class="form-check-label">{{label}}</label>
+            {{#description}}<div class="form-text">{{description}}</div>{{/description}}
+        </div>
+    {{/switches}}
+    <input type="submit" name="savelivecontrols" value="{{savelabel}}" class="btn btn-primary">
+</form>
+
+{{#showrandom}}
+    <details class="mod-dictogloss-section mt-4 mb-4" open>
+        <summary class="mod-dictogloss-summary h5">{{randomteamslabel}}</summary>
+        <p class="text-muted">{{randomteamsintro}}</p>
+
+        {{#features}}
+            <h4 class="h6 mt-3">{{label}}</h4>
+            {{#nopool}}
+                <div class="alert alert-info">{{nopoolmessage}}</div>
+            {{/nopool}}
+            {{^nopool}}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{{participantlabel}}</th>
+                                <th>{{partnerslabel}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#teams}}
+                                <tr>
+                                    <td>{{fullname}}</td>
+                                    <td>{{partners}}</td>
+                                </tr>
+                            {{/teams}}
+                        </tbody>
+                    </table>
+                </div>
+            {{/nopool}}
+            {{#showreshuffle}}
+                <form method="post" action="{{formaction}}">
+                    <input type="hidden" name="id" value="{{cmid}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="feature" value="{{feature}}">
+                    <button type="submit" name="reshufflerandom" value="1"
+                            class="btn btn-outline-warning btn-sm"
+                            data-dictogloss-confirm="{{reshuffleconfirm}}">{{reshufflelabel}}</button>
+                </form>
+            {{/showreshuffle}}
+        {{/features}}
+
+        {{#shared}}
+            <form method="post" action="{{formaction}}">
+                <input type="hidden" name="id" value="{{cmid}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <button type="submit" name="reshufflerandom" value="1"
+                        class="btn btn-outline-warning"
+                        data-dictogloss-confirm="{{reshuffleconfirm}}">{{reshufflelabel}}</button>
+            </form>
+        {{/shared}}
+    </details>
+{{/showrandom}}

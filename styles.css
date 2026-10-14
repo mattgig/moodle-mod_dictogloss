@@ -1,0 +1,208 @@
+/*
+ * Styles for the Dictogloss activity module.
+ *
+ * Colours use Bootstrap/theme CSS variables so the module follows the active
+ * theme and dark mode.
+ *
+ * @package    mod_dictogloss
+ * @copyright  2026 Dictogloss contributors
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+.mod-dictogloss-stages .badge {
+    font-size: 0.9rem;
+}
+
+.mod-dictogloss-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 0.85rem;
+    padding: 1.5rem 1rem;
+    background-color: var(--bs-light);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    line-height: 1.2;
+}
+
+.dictogloss-cloud-word {
+    display: inline-block;
+    text-decoration: none;
+    color: var(--bs-primary);
+    transition: transform 0.1s ease-in-out;
+}
+
+.dictogloss-cloud-word:hover {
+    transform: translateY(-2px);
+}
+
+.dictogloss-cloud-word.dictogloss-own {
+    font-weight: 700;
+    color: var(--bs-white);
+    background-color: var(--bs-primary);
+    padding: 0 0.45rem;
+    border-radius: 0.4rem;
+}
+
+.dictogloss-weight-1 {
+    font-size: 0.9rem;
+}
+
+.dictogloss-weight-2 {
+    font-size: 1.05rem;
+}
+
+.dictogloss-weight-3 {
+    font-size: 1.3rem;
+}
+
+.dictogloss-weight-4 {
+    font-size: 1.6rem;
+}
+
+.dictogloss-weight-5 {
+    font-size: 1.9rem;
+}
+
+.dictogloss-weight-6 {
+    font-size: 2.3rem;
+}
+
+.mod-dictogloss-slot .card-header {
+    background-color: var(--bs-secondary-bg);
+}
+
+.mod-dictogloss-anchor {
+    font-weight: 600;
+    color: var(--bs-body-color);
+}
+
+.mod-dictogloss-option-text {
+    font-size: 1.05rem;
+}
+
+.colorby-similarity .dictogloss-word-matched {
+    color: var(--bs-body-color);
+}
+
+.colorby-similarity .dictogloss-word-extra {
+    color: var(--bs-primary);
+}
+
+.mod-dictogloss-authors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.mod-dictogloss-authors .badge {
+    font-weight: 500;
+}
+
+.mod-dictogloss-peer-text {
+    line-height: 1.6;
+}
+
+.mod-dictogloss-peers .dictogloss-word-new {
+    font-weight: 700;
+    background-color: var(--bs-warning-bg-subtle);
+    border-radius: 0.15rem;
+}
+
+.mod-dictogloss-peers .dictogloss-word-have {
+    color: var(--bs-secondary-color);
+}
+
+.mod-dictogloss-peers.nocopy .mod-dictogloss-peer-text {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.mod-dictogloss-variants.hidenames .mod-dictogloss-authors {
+    display: none;
+}
+
+.mod-dictogloss-variants.focus-mode .mod-dictogloss-slot {
+    opacity: 0.25;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.mod-dictogloss-variants.focus-mode .mod-dictogloss-slot.is-focused {
+    opacity: 1;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.mod-dictogloss-section > summary.mod-dictogloss-summary {
+    cursor: pointer;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+    margin-bottom: 0.75rem;
+}
+
+.mod-dictogloss-section[open] > summary.mod-dictogloss-summary {
+    margin-bottom: 1rem;
+}
+
+.mod-dictogloss-audio audio {
+    display: block;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    max-width: 480px;
+}
+
+.dictogloss-diff {
+    line-height: 1.9;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    background-color: var(--bs-body-bg);
+}
+
+.dictogloss-token {
+    padding: 0 0.1rem;
+    border-radius: 0.2rem;
+}
+
+.dictogloss-token.dictogloss-matched {
+    background-color: var(--bs-success-bg-subtle);
+}
+
+.dictogloss-token.dictogloss-missing {
+    background-color: var(--bs-danger-bg-subtle);
+    text-decoration: line-through;
+}
+
+.dictogloss-token.dictogloss-extra {
+    background-color: var(--bs-warning-bg-subtle);
+}
+
+.dictogloss-key {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.2rem;
+    margin-right: 0.4rem;
+}
+
+.dictogloss-key.dictogloss-matched {
+    background-color: var(--bs-success-bg-subtle);
+}
+
+.dictogloss-key.dictogloss-missing {
+    background-color: var(--bs-danger-bg-subtle);
+}
+
+.dictogloss-key.dictogloss-extra {
+    background-color: var(--bs-warning-bg-subtle);
+}
+
+.mod-dictogloss-readonly {
+    white-space: pre-wrap;
+    border-left: 3px solid var(--bs-border-color);
+    padding-left: 0.75rem;
+}
+
+.mod-dictogloss-autosave {
+    color: var(--bs-secondary-color);
+    font-size: 0.85rem;
+}

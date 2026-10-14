@@ -1,0 +1,16 @@
+{{!
+    @template mod_dictogloss/stage_nav
+    Displays the dictogloss stage navigation.
+}}
+<ol class="mod-dictogloss-stages list-inline mb-3">
+    {{#stages}}
+        <li class="list-inline-item">
+            <span class="badge {{#active}}text-bg-primary{{/active}}{{^active}}{{#done}}text-bg-success{{/done}}{{^done}}text-bg-secondary{{/done}}{{/active}}"
+                  {{#active}}aria-current="step"{{/active}}>
+                {{label}}
+                {{#active}}<span class="visually-hidden"> ({{currentlabel}})</span>{{/active}}
+                {{^active}}{{#done}}<span class="visually-hidden"> ({{donelabel}})</span>{{/done}}{{/active}}
+            </span>
+        </li>
+    {{/stages}}
+</ol>

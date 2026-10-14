@@ -1,0 +1,25 @@
+{{!
+    @template mod_dictogloss/comparison
+    Side-by-side comparison of the student reconstruction and the original text.
+}}
+<div class="mod-dictogloss-comparison mb-4">
+    <div class="row">
+        <div class="col-md-6">
+            <h5>{{#str}}teachersversion, mod_dictogloss{{/str}}</h5>
+            <p class="dictogloss-diff">
+                {{#source_tokens}}<span class="dictogloss-token dictogloss-{{status}}">{{raw}}<span class="visually-hidden"> ({{label}})</span></span> {{/source_tokens}}
+            </p>
+        </div>
+        <div class="col-md-6">
+            <h5>{{#str}}yourversion, mod_dictogloss{{/str}}</h5>
+            <p class="dictogloss-diff">
+                {{#student_tokens}}<span class="dictogloss-token dictogloss-{{status}}">{{raw}}<span class="visually-hidden"> ({{label}})</span></span> {{/student_tokens}}
+            </p>
+        </div>
+    </div>
+    <p class="small">
+        <span class="dictogloss-key dictogloss-matched">{{legendmatched}}</span>
+        <span class="dictogloss-key dictogloss-missing">{{legendmissing}}</span>
+        <span class="dictogloss-key dictogloss-extra">{{legendextra}}</span>
+    </p>
+</div>

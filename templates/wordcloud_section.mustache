@@ -1,0 +1,42 @@
+{{!
+    @template mod_dictogloss/wordcloud_section
+    Word cloud heading, optional refresh button and cloud.
+
+    Example context (json):
+    {
+        "id": "mod-dictogloss-wordcloud",
+        "heading": "Word cloud",
+        "refreshlabel": "Refresh",
+        "buttonid": "mod-dictogloss-refresh-cloud",
+        "canrefresh": true,
+        "hasentries": true,
+        "entries": [{"word": "climate", "count": 3, "weight": 6, "own": true}],
+        "empty": "No keywords yet."
+    }
+}}
+<div class="mod-dictogloss-wordcloud-section mb-4" id="{{id}}">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <h3 class="main mb-0">{{heading}}</h3>
+        {{#canrefresh}}
+            <button type="button" id="{{buttonid}}" class="btn btn-sm btn-outline-secondary">{{refreshlabel}}</button>
+        {{/canrefresh}}
+    </div>
+    <div class="mod-dictogloss-wordcloud">
+        {{#hasentries}}
+            <div class="mod-dictogloss-cloud">
+                {{#entries}}
+                    <span class="dictogloss-cloud-word dictogloss-weight-{{weight}}{{#own}} dictogloss-own{{/own}}"
+                          title="{{count}}" aria-hidden="true">{{word}}</span>
+                {{/entries}}
+            </div>
+            <ul class="visually-hidden mod-dictogloss-wordcloud-list">
+                {{#entries}}
+                    <li>{{word}} ({{count}})</li>
+                {{/entries}}
+            </ul>
+        {{/hasentries}}
+        {{^hasentries}}
+            <p class="text-muted mb-0">{{empty}}</p>
+        {{/hasentries}}
+    </div>
+</div>

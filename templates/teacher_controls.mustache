@@ -1,0 +1,23 @@
+{{!
+    @template mod_dictogloss/teacher_controls
+    Per-student teacher controls (delete / reopen).
+}}
+<div class="mod-dictogloss-teachercontrols mb-3">
+    <form method="post" action="{{reportaction}}" class="d-inline">
+        <input type="hidden" name="id" value="{{cmid}}">
+        <input type="hidden" name="userid" value="{{userid}}">
+        <input type="hidden" name="action" value="deletesubmission">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="submit" value="{{deletelabel}}" class="btn btn-sm btn-outline-danger"
+               data-dictogloss-confirm="{{deleteconfirm}}">
+    </form>
+    {{#finalised}}
+        <form method="post" action="{{viewaction}}" class="d-inline">
+            <input type="hidden" name="id" value="{{cmid}}">
+            <input type="hidden" name="userid" value="{{userid}}">
+            <input type="hidden" name="action" value="reopen">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="submit" value="{{reopenlabel}}" class="btn btn-sm btn-outline-warning" title="{{reopenhelp}}">
+        </form>
+    {{/finalised}}
+</div>

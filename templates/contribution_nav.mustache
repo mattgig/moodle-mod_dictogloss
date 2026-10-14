@@ -1,0 +1,31 @@
+{{!
+    @template mod_dictogloss/contribution_nav
+    Teacher navigation between student contributions.
+}}
+<div class="mod-dictogloss-contributionnav d-flex flex-wrap align-items-center gap-2 mb-3">
+    {{#prevurl}}
+        <a href="{{prevurl}}" class="btn btn-sm btn-outline-secondary">{{prevlabel}}</a>
+    {{/prevurl}}
+    {{^prevurl}}
+        <span class="btn btn-sm btn-outline-secondary disabled">{{prevlabel}}</span>
+    {{/prevurl}}
+
+    <form method="get" action="{{formaction}}" class="mb-0 d-flex align-items-center gap-2">
+        <input type="hidden" name="id" value="{{cmid}}">
+        <label for="mod-dictogloss-contributor-picker" class="visually-hidden">{{selectlabel}}</label>
+        <select name="userid" id="mod-dictogloss-contributor-picker" class="form-select w-auto">
+            <option value="">{{selectlabel}}</option>
+            {{#options}}
+                <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+            {{/options}}
+        </select>
+        <button type="submit" class="btn btn-sm btn-outline-secondary">{{applylabel}}</button>
+    </form>
+
+    {{#nexturl}}
+        <a href="{{nexturl}}" class="btn btn-sm btn-outline-secondary">{{nextlabel}}</a>
+    {{/nexturl}}
+    {{^nexturl}}
+        <span class="btn btn-sm btn-outline-secondary disabled">{{nextlabel}}</span>
+    {{/nexturl}}
+</div>

@@ -1,0 +1,99 @@
+{{!
+    @template mod_dictogloss/peers
+    Student-facing panel of the group's reconstructions (clusters + full texts).
+
+    Example context (json):
+    {
+        "allowcopy": false,
+        "hasslots": true,
+        "haspeers": true,
+        "slots": [],
+        "peers": []
+    }
+}}
+<div class="mod-dictogloss-peers {{#allowcopy}}allowcopy{{/allowcopy}}{{^allowcopy}}nocopy{{/allowcopy}}">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button type="button" role="tab" aria-selected="true"
+                    id="mod-dictogloss-tab-clusters" aria-controls="mod-dictogloss-pane-clusters"
+                    class="nav-link active" data-dictogloss-peertab="clusters">{{clusterslabel}}</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button type="button" role="tab" aria-selected="false"
+                    id="mod-dictogloss-tab-fulltexts" aria-controls="mod-dictogloss-pane-fulltexts"
+                    class="nav-link" data-dictogloss-peertab="fulltexts">{{fulltextslabel}}</button>
+        </li>
+    </ul>
+    <div class="tab-content pt-3">
+        <div role="tabpanel" id="mod-dictogloss-pane-clusters" aria-labelledby="mod-dictogloss-tab-clusters"
+             data-dictogloss-peertabpane="clusters">
+            {{#hasslots}}
+                {{#slots}}
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center gap-2">
+                            <button class="btn btn-link p-0 text-start flex-grow-1 text-body text-decoration-none" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#mod-dictogloss-peerslot-{{index}}"
+                                    aria-expanded="true"
+                                    aria-controls="mod-dictogloss-peerslot-{{index}}">
+                                {{#hasanchor}}{{anchor}}{{/hasanchor}}{{^hasanchor}}{{additionallabel}}{{/hasanchor}}
+                            </button>
+                            <span class="badge text-bg-secondary text-nowrap">{{optioncount}}</span>
+                        </div>
+                        <div class="collapse show" id="mod-dictogloss-peerslot-{{index}}">
+                            <ul class="list-group list-group-flush">
+                                {{#options}}
+                                    <li class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <span class="mod-dictogloss-peer-text">{{#words}}<span class="dictogloss-word dictogloss-word-{{status}}">{{text}}</span>{{/words}}</span>
+                                            <span class="text-nowrap ms-3">
+                                                <span class="badge text-bg-primary">{{count}}</span>
+                                                {{#isown}}<span class="badge text-bg-info">{{ownlabel}}</span>{{/isown}}
+                                                <button type="button" class="btn btn-sm btn-outline-primary mod-dictogloss-peer-add"
+                                                        data-text="{{text}}">{{addlabel}}</button>
+                                            </span>
+                                        </div>
+                                    </li>
+                                {{/options}}
+                            </ul>
+                        </div>
+                    </div>
+                {{/slots}}
+            {{/hasslots}}
+            {{^hasslots}}<p class="text-muted">{{empty}}</p>{{/hasslots}}
+        </div>
+        <div class="d-none" role="tabpanel" id="mod-dictogloss-pane-fulltexts"
+             aria-labelledby="mod-dictogloss-tab-fulltexts" data-dictogloss-peertabpane="fulltexts">
+            {{#haspeers}}
+                {{#peers}}
+                    <div class="card mb-3{{#isown}} border-info{{/isown}}">
+                        <div class="card-header d-flex justify-content-between align-items-center gap-2">
+                            <button class="btn btn-link p-0 text-start flex-grow-1 text-body text-decoration-none" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#mod-dictogloss-peertext-{{index}}"
+                                    aria-expanded="true"
+                                    aria-controls="mod-dictogloss-peertext-{{index}}">
+                                {{label}}
+                                {{#isown}}<span class="badge text-bg-info">{{ownlabel}}</span>{{/isown}}
+                            </button>
+                        </div>
+                        <div class="collapse show" id="mod-dictogloss-peertext-{{index}}">
+                            <div class="card-body">
+                                {{#sentences}}
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="mod-dictogloss-peer-text">{{#words}}<span class="dictogloss-word dictogloss-word-{{status}}">{{text}}</span>{{/words}}</span>
+                                        {{#showadd}}
+                                            <button type="button" class="btn btn-sm btn-outline-primary mod-dictogloss-peer-add ms-3"
+                                                    data-text="{{text}}">{{addlabel}}</button>
+                                        {{/showadd}}
+                                    </div>
+                                {{/sentences}}
+                            </div>
+                        </div>
+                    </div>
+                {{/peers}}
+            {{/haspeers}}
+            {{^haspeers}}<p class="text-muted">{{empty}}</p>{{/haspeers}}
+        </div>
+    </div>
+</div>
