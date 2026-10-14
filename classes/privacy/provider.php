@@ -253,6 +253,30 @@ class provider implements
                     (object) ['overrides' => $overridedata]
                 );
             }
+
+            // Submissions this user graded (their own grading action and feedback).
+            $graded = $DB->get_records_sql(
+                "SELECT s.id, s.grade, s.feedback, s.timegraded
+                   FROM {dictogloss_submissions} s
+                   JOIN {dictogloss} d ON d.id = s.dictogloss
+                   JOIN {course_modules} cm ON cm.instance = d.id
+                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+                  WHERE cm.id = :cmid AND s.grader = :graderid",
+                ['modname' => 'dictogloss', 'cmid' => $context->instanceid, 'graderid' => $userid]);
+            if ($graded) {
+                $gradeddata = [];
+                foreach ($graded as $gradedrow) {
+                    $gradeddata[] = (object) [
+                        'grade' => $gradedrow->grade,
+                        'feedback' => $gradedrow->feedback,
+                        'timegraded' => transform::datetime($gradedrow->timegraded),
+                    ];
+                }
+                writer::with_context($context)->export_data(
+                    [get_string('privacy:path:graded', 'mod_dictogloss')],
+                    (object) ['graded' => $gradeddata]
+                );
+            }
         }
     }
 
@@ -377,5 +401,8 @@ class provider implements
             [$dictoglossid, $userid, $userid]);
         $DB->delete_records('dictogloss_wordoverrides',
             ['dictogloss' => $dictoglossid, 'moderatedby' => $userid]);
+        // Anonymise any grading performed by this user on other contributions.
+        $DB->set_field_select('dictogloss_submissions', 'grader', 0,
+            'dictogloss = ? AND grader = ?', [$dictoglossid, $userid]);
     }
 }

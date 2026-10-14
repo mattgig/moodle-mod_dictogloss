@@ -55,9 +55,9 @@ class autosave_handler {
                 if (empty($instance->shownotes)) {
                     return ['ok' => false, 'reason' => 'off'];
                 }
-                if ($status >= \mod_dictogloss\activity::STATUS_SUBMITTED) {
-                    // Notes are frozen once the reconstruction has been submitted.
-                    return ['ok' => false, 'reason' => 'submitted'];
+                if ($status >= \mod_dictogloss\activity::STATUS_RECONSTRUCTION) {
+                    // Notes are frozen once the reconstruction has started.
+                    return ['ok' => false, 'reason' => 'stage'];
                 }
                 $activity->submissions()->save_keywords($value, $USER->id);
                 break;

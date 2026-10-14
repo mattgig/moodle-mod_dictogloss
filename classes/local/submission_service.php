@@ -163,15 +163,17 @@ class submission_service {
         global $DB;
         $submission = $this->ensure_submission($userid);
 
-        // Nothing to do when the text has not changed (frequent autosave calls).
-        if ((string) $submission->keywords === (string) $rawkeywords
-                && $submission->status >= activity::STATUS_KEYWORDS) {
-            return $submission;
-        }
-
         // Keep the group id current so peer word clouds can find these keywords.
         $currentgroupid = $this->activity->scope()->get_group_id($submission->userid);
-        if ((int) $submission->groupid !== (int) $currentgroupid) {
+        $groupchanged = ((int) $submission->groupid !== (int) $currentgroupid);
+
+        // Nothing to do when neither the text nor the group has changed (frequent autosave calls).
+        if ((string) $submission->keywords === (string) $rawkeywords
+                && $submission->status >= activity::STATUS_KEYWORDS
+                && !$groupchanged) {
+            return $submission;
+        }
+        if ($groupchanged) {
             $submission->groupid = $currentgroupid;
         }
 
@@ -299,6 +301,7 @@ class submission_service {
     public function submit_reconstruction($userid = null): \stdClass {
         global $DB;
         $submission = $this->ensure_submission($userid);
+        $previouslysubmitted = ((int) $submission->status >= activity::STATUS_SUBMITTED);
 
         $now = time();
         $DB->update_record('dictogloss_submissions', (object) [
@@ -311,7 +314,7 @@ class submission_service {
 
         $this->activity->grader()->recalculate($submission);
         $this->refresh_completion($submission->userid);
-        $this->trigger_submission_event('submission_created', $submission);
+        $this->trigger_submission_event($previouslysubmitted ? 'submission_updated' : 'submission_created', $submission);
 
         return $this->get_submission($submission->userid);
     }

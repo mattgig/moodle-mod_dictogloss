@@ -24,6 +24,10 @@
                     class="nav-link" data-dictogloss-peertab="fulltexts">{{fulltextslabel}}</button>
         </li>
     </ul>
+    <p class="small mb-2">
+        <span class="dictogloss-word dictogloss-word-have">{{legendhavelabel}}</span>
+        <span class="dictogloss-word dictogloss-word-new">{{legendnewlabel}}</span>
+    </p>
     <div class="tab-content pt-3">
         <div role="tabpanel" id="mod-dictogloss-pane-clusters" aria-labelledby="mod-dictogloss-tab-clusters"
              data-dictogloss-peertabpane="clusters">
@@ -45,7 +49,7 @@
                                 {{#options}}
                                     <li class="list-group-item">
                                         <div class="d-flex justify-content-between align-items-start">
-                                            <span class="mod-dictogloss-peer-text">{{#words}}<span class="dictogloss-word dictogloss-word-{{status}}">{{text}}</span>{{/words}}</span>
+                                            <span class="mod-dictogloss-peer-text">{{#words}}<span class="dictogloss-word dictogloss-word-{{status}}">{{text}}<span class="visually-hidden"> ({{label}})</span></span>{{/words}}</span>
                                             <span class="text-nowrap ms-3">
                                                 <span class="badge text-bg-primary">{{count}}</span>
                                                 {{#isown}}<span class="badge text-bg-info">{{ownlabel}}</span>{{/isown}}
@@ -81,7 +85,7 @@
                             <div class="card-body">
                                 {{#sentences}}
                                     <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <span class="mod-dictogloss-peer-text">{{#words}}<span class="dictogloss-word dictogloss-word-{{status}}">{{text}}</span>{{/words}}</span>
+                                        <span class="mod-dictogloss-peer-text">{{#words}}<span class="dictogloss-word dictogloss-word-{{status}}">{{text}}<span class="visually-hidden"> ({{label}})</span></span>{{/words}}</span>
                                         {{#showadd}}
                                             <button type="button" class="btn btn-sm btn-outline-primary mod-dictogloss-peer-add ms-3"
                                                     data-text="{{text}}">{{addlabel}}</button>

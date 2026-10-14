@@ -190,6 +190,11 @@ if ($canedit) {
     } else if ($stage === 'reconstruction' || ($stage === 'keywords' && empty($instance->shownotes))) {
         $reconstructionform = new reconstruction_form($PAGE->url);
         if ($activity->state()->is_reconstruction_open() && ($data = $reconstructionform->get_data())) {
+            if (!empty($data->submitreconstruction) && trim((string) $data->reconstruction) === '') {
+                // A blank reconstruction cannot be submitted or handed in.
+                redirect($PAGE->url, get_string('required'), null,
+                    \core\output\notification::NOTIFY_ERROR);
+            }
             $activity->submissions()->save_reconstruction($data->reconstruction, $viewuserid);
             if (!empty($data->submitreconstruction)) {
                 $activity->submissions()->submit_reconstruction($viewuserid);

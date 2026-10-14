@@ -62,15 +62,15 @@ class save_field extends external_api {
             'value' => $value,
         ]);
 
-        // Reject unreasonably large payloads to protect the database and token tables.
-        if (\core_text::strlen($params['value']) > 20000) {
-            return ['ok' => false, 'reason' => 'toolong'];
-        }
-
         list($course, $cm) = get_course_and_cm_from_cmid($params['cmid'], 'dictogloss');
         $context = \core\context\module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/dictogloss:submit', $context);
+
+        // Reject unreasonably large payloads to protect the database and token tables.
+        if (\core_text::strlen($params['value']) > 20000) {
+            return ['ok' => false, 'reason' => 'toolong'];
+        }
 
         $instance = $DB->get_record('dictogloss', ['id' => $cm->instance], '*', MUST_EXIST);
         $activity = new activity($cm, $course, $instance);

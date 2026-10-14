@@ -371,6 +371,8 @@ function dictogloss_reset_userdata($data) {
         $instanceids = $DB->get_fieldset_select('dictogloss', 'id', 'course = ?', [$data->courseid]);
         if ($instanceids) {
             list($insql, $inparams) = $DB->get_in_or_equal($instanceids, SQL_PARAMS_QM);
+            $affectedusers = $DB->get_fieldset_sql(
+                "SELECT DISTINCT userid FROM {dictogloss_submissions} WHERE dictogloss $insql", $inparams);
             $submissionids = $DB->get_fieldset_select('dictogloss_submissions', 'id',
                 "dictogloss $insql", $inparams);
             if ($submissionids) {
@@ -381,6 +383,21 @@ function dictogloss_reset_userdata($data) {
             $DB->delete_records_select('dictogloss_wordoverrides', "dictogloss $insql", $inparams);
             $DB->delete_records_select('dictogloss_randompartners', "dictogloss $insql", $inparams);
             $DB->set_field_select('dictogloss', 'timemodified', time(), "id $insql", $inparams);
+
+            // Recompute completion for the affected users now that their contributions are gone.
+            if ($affectedusers) {
+                $course = get_course($data->courseid);
+                $completion = new completion_info($course);
+                foreach ($instanceids as $instanceid) {
+                    $cm = get_coursemodule_from_instance('dictogloss', $instanceid, $data->courseid);
+                    if (!$cm || !$completion->is_enabled($cm)) {
+                        continue;
+                    }
+                    foreach ($affectedusers as $affuserid) {
+                        $completion->update_state($cm, COMPLETION_UNKNOWN, (int) $affuserid);
+                    }
+                }
+            }
         }
 
         $status[] = [

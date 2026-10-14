@@ -96,8 +96,11 @@ regenerate them (the current assignment is replaced).
 The standard Moodle **Common module settings**, **Grade** and **Completion** sections follow.
 - Use **Group mode** / **Grouping** to scope the activity. When a grouping is set, the word
   cloud and peer features only use groups from that grouping.
+- In a course using **separate groups**, a teacher who does not have
+  `moodle/site:accessallgroups` only sees, grades and moderates the contributions of their own
+  groups (in the monitor, results, comparison and word-cloud moderation views).
 - **Grade → Maximum grade** enables the gradebook item.
-- **Completion → Require a submitted reconstruction** completes the activity once a learner has
+- **Completion → Require a handed-in contribution** completes the activity once a learner has
   **handed in** their contribution (not merely submitted the first draft when a follow-up rewrite
   is enabled).
 

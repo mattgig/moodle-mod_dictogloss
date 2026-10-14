@@ -59,7 +59,7 @@ $groupselect = $activity->scope()->get_group_filter_options((int) $cm->groupingi
 $visibleuserids = $activity->scope()->get_visible_userids();
 
 $table = new \mod_dictogloss\table\results_table('mod-dictogloss-results', $cm, $instance, $groupfilter,
-    empty($download), $visibleuserids);
+    empty($download) && has_capability('mod/dictogloss:manage', $context), $visibleuserids);
 $table->is_downloading($download, 'dictogloss-results', get_string('results', 'mod_dictogloss'));
 
 if (!$table->is_downloading()) {

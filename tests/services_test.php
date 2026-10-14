@@ -41,6 +41,7 @@ require_once($CFG->dirroot . '/mod/dictogloss/lib.php');
  * @covers     \mod_dictogloss\local\submission_service
  * @covers     \mod_dictogloss\local\state_service
  * @covers     \mod_dictogloss\local\grader
+ * @covers     \mod_dictogloss\completion\custom_completion
  * @covers     \mod_dictogloss\overview\sentence_clusterer
  */
 final class services_test extends \advanced_testcase {
@@ -196,5 +197,28 @@ final class services_test extends \advanced_testcase {
         $extra = array_values(array_filter($result['slots'], fn($slot) => $slot['anchor'] === null));
         $this->assertNotEmpty($extra);
         $this->assertSame('Zebras eat bananas in winter.', $extra[0]['options'][0]['text']);
+    }
+
+    /**
+     * The custom completion rule completes only on hand-in and reverts on reopen.
+     */
+    public function test_custom_completion_rule() {
+        list($activity, $user, $course) = $this->setup_activity(['completionsubmit' => 1]);
+        $cm = \cm_info::create(get_coursemodule_from_instance('dictogloss',
+            $activity->get_instance()->id, $course->id));
+        $completion = new \mod_dictogloss\completion\custom_completion($cm, $user->id);
+
+        $this->assertEquals(COMPLETION_INCOMPLETE, $completion->get_state('completionsubmit'));
+
+        $activity->submissions()->save_reconstruction('Some text.', $user->id);
+        $activity->submissions()->submit_reconstruction($user->id);
+        // The rule requires a hand-in, not just a submission.
+        $this->assertEquals(COMPLETION_INCOMPLETE, $completion->get_state('completionsubmit'));
+
+        $activity->submissions()->finalise_submission($user->id);
+        $this->assertEquals(COMPLETION_COMPLETE, $completion->get_state('completionsubmit'));
+
+        $activity->submissions()->reopen_submission($user->id);
+        $this->assertEquals(COMPLETION_INCOMPLETE, $completion->get_state('completionsubmit'));
     }
 }

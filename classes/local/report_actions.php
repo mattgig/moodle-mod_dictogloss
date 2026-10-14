@@ -119,7 +119,25 @@ class report_actions {
             $hides = optional_param_array('hide', [], PARAM_INT);
             $renames = optional_param_array('rename', [], PARAM_RAW);
 
-            $activity->wordcloud()->save_moderation($words, $hides, $renames, $USER->id);
+            // Only allow moderating words that are within the viewer's current scope,
+            // so a restricted teacher cannot hide/rename another group's words.
+            $allowed = [];
+            foreach ($activity->wordcloud()->get_keyword_aggregate($groupfilter ?: null, $wordclouduserids) as $row) {
+                $allowed[\core_text::strtolower((string) $row->word)] = true;
+            }
+            $scopedwords = [];
+            $scopedhides = [];
+            $scopedrenames = [];
+            foreach ($words as $index => $word) {
+                $norm = \core_text::strtolower(trim((string) $word));
+                if ($norm !== '' && isset($allowed[$norm])) {
+                    $scopedwords[$index] = $word;
+                    $scopedhides[$index] = $hides[$index] ?? 0;
+                    $scopedrenames[$index] = $renames[$index] ?? '';
+                }
+            }
+
+            $activity->wordcloud()->save_moderation($scopedwords, $scopedhides, $scopedrenames, $USER->id);
 
             $event = \mod_dictogloss\event\words_moderated::create([
                 'objectid' => $instance->id,

@@ -74,7 +74,9 @@ class results_table extends \table_sql {
                 $where .= " AND u.id $insql";
                 $params = array_merge($params, $inparams);
             }
-        } else if ($groupid) {
+        }
+        if ($groupid) {
+            // Applied in addition to any user scope so the group filter still narrows the result.
             $where .= " AND u.id IN (SELECT gm.userid FROM {groups_members} gm WHERE gm.groupid = :groupid)";
             $params['groupid'] = $groupid;
         }

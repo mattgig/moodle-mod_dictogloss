@@ -192,8 +192,10 @@ class overview_service {
             list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'vis');
             $scopeclause = " AND u.id $insql";
             $params = array_merge($params, $inparams);
-        } else if ($groupid) {
-            $scopeclause = " AND u.id IN (SELECT gm.userid FROM {groups_members} gm WHERE gm.groupid = :groupid)";
+        }
+        if ($groupid) {
+            // Applied in addition to any user scope so the group filter still narrows the result.
+            $scopeclause .= " AND u.id IN (SELECT gm.userid FROM {groups_members} gm WHERE gm.groupid = :groupid)";
             $params['groupid'] = $groupid;
         }
         $enrolled = (int) $DB->count_records_sql("SELECT COUNT(DISTINCT u.id) FROM $from WHERE $where $scopeclause", $params);
@@ -210,7 +212,8 @@ class overview_service {
             list($sinsql, $sinparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'viss');
             $statussql .= " AND s.userid $sinsql";
             $sparams = array_merge($sparams, $sinparams);
-        } else if ($groupid) {
+        }
+        if ($groupid) {
             $statussql .= self::group_scope_sql();
             $sparams['groupid'] = $groupid;
         }

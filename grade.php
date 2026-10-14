@@ -26,6 +26,8 @@ require_once('../../config.php');
 require_once($CFG->libdir . '/gradelib.php');
 require_once($CFG->dirroot . '/mod/dictogloss/lib.php');
 
+use mod_dictogloss\activity;
+
 $id = required_param('id', PARAM_INT);
 $userid = optional_param('userid', 0, PARAM_INT);
 
@@ -42,6 +44,12 @@ $PAGE->set_context($context);
 
 if ($userid) {
     require_capability('mod/dictogloss:grade', $context);
+
+    // Respect the activity group mode: a restricted grader may only see their groups' users.
+    $activity = new activity($cm, $course, $instance);
+    if (!$activity->can_access_user($userid)) {
+        throw new \moodle_exception('nopermissions', 'error', '', get_string('grade'));
+    }
 
     $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
     $gradinginfo = grade_get_grades($course->id, 'mod', 'dictogloss', $instance->id, $userid);

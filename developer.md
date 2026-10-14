@@ -110,6 +110,23 @@ Entry scripts stay thin and delegate to small handlers:
 | `autosave_handler` | `external\save_field` (field autosave, gated by the current state). |
 | `peers_handler` | `external\get_peers` (build the group-reconstructions panel). |
 
+### Group scoping and access control
+
+Teacher-facing pages and actions honour the activity group mode:
+- `activity::can_access_user($userid)` checks that the target is enrolled (or has a contribution)
+  and, in separate-groups mode without `moodle/site:accessallgroups`, that the viewer shares a
+  group with them. It is called from `view.php`, `view_actions`, `report_actions`,
+  `results_actions` and `grade.php`.
+- `scope_resolver::get_visible_userids()` returns `null` (unrestricted) or the list of user ids in
+  the teacher's allowed groups (`[]` fails closed). `report.php` and `results.php` pass it into the
+  listing queries, and `get_group_filter_options()` only offers the allowed groups.
+- `wordcloud_service::save_moderation()` is scoped in `report_actions` to the words currently
+  visible to the teacher, so a restricted teacher cannot moderate another group's words.
+
+Stage gates are enforced server-side in `autosave_handler` and in the `view.php` form handling:
+`keywords` are frozen once reconstruction starts, `reconstruction` once it is submitted (or while
+it is held), and `followup` only after submission.
+
 ### External functions (AJAX)
 
 The browser talks to the server through Moodle external functions (`db/services.php` +

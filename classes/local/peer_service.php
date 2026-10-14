@@ -34,6 +34,9 @@ defined('MOODLE_INTERNAL') || die();
  */
 class peer_service {
 
+    /** Safety cap on the number of shared reconstructions loaded at once. */
+    const PEER_ROW_LIMIT = 5000;
+
     /** @var activity The activity. */
     protected $activity;
     /** @var \stdClass The dictogloss instance record. */
@@ -200,7 +203,7 @@ class peer_service {
         }
 
         $sql .= " ORDER BY s.userid ASC";
-        $records = $DB->get_records_sql($sql, $params);
+        $records = $DB->get_records_sql($sql, $params, 0, self::PEER_ROW_LIMIT);
 
         $peers = [];
         foreach ($records as $record) {

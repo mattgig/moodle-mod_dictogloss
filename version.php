@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_dictogloss';
-$plugin->version   = 2026100614;
+$plugin->version   = 2026100615;
 $plugin->requires  = 2025041400; // Moodle 5.0.
 $plugin->supported = [500, 503];
 $plugin->maturity  = MATURITY_ALPHA;

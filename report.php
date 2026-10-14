@@ -88,7 +88,7 @@ if ($anyrandom) {
     $filteroptions = [0 => get_string('allstudents', 'mod_dictogloss')];
     $students = get_enrolled_users($context, 'mod/dictogloss:submit', 0,
         'u.id, u.firstname, u.lastname, u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename',
-        'u.lastname, u.firstname', 0, 0, true);
+        'u.lastname, u.firstname', 0, 5000, true);
     foreach ($students as $student) {
         if ($visibleuserids !== null && !in_array((int) $student->id, $visibleuserids, true)) {
             continue;
@@ -122,7 +122,11 @@ echo html_writer::tag('label', $filterlabel, ['for' => $filterid, 'class' => 'mb
 echo html_writer::select($filteroptions, $filtername, $filtervalue, false, [
     'id' => $filterid,
     'class' => 'form-select w-auto',
-    'onchange' => 'this.form.submit()',
+]);
+echo html_writer::empty_tag('input', [
+    'type' => 'submit',
+    'class' => 'btn btn-outline-secondary',
+    'value' => get_string('filterapply', 'mod_dictogloss'),
 ]);
 echo html_writer::end_tag('form');
 
@@ -161,11 +165,14 @@ if ($aggregate) {
             format_string($row->word) . html_writer::empty_tag('input',
                 ['type' => 'hidden', 'name' => "word[$index]", 'value' => $row->word]),
             (int) $row->c,
-            html_writer::checkbox("hide[$index]", 1, $override && $override->action === 'hide'),
+            html_writer::checkbox("hide[$index]", 1, $override && $override->action === 'hide', '', [
+                'aria-label' => get_string('hideword', 'mod_dictogloss') . ': ' . format_string($row->word),
+            ]),
             html_writer::empty_tag('input', [
                 'type' => 'text',
                 'name' => "rename[$index]",
                 'value' => ($override && $override->action === 'rename') ? $override->replacement : '',
+                'aria-label' => get_string('renameword', 'mod_dictogloss') . ': ' . format_string($row->word),
             ]),
         ];
         $index++;

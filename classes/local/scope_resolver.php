@@ -153,7 +153,7 @@ class scope_resolver {
               ORDER BY g.name";
         $map = [];
         foreach ($DB->get_records_sql($sql, $params) as $record) {
-            $map[(int) $record->userid][] = format_string($record->name);
+            $map[(int) $record->userid][] = $record->name;
         }
         return $map;
     }
@@ -174,14 +174,14 @@ class scope_resolver {
             // Restricted teachers may only filter by the groups they can access.
             $options = [];
             foreach (groups_get_activity_allowed_groups($this->cm) as $group) {
-                $options[(int) $group->id] = format_string($group->name);
+                $options[(int) $group->id] = $group->name;
             }
             return $options;
         }
 
         $options = [0 => get_string('allgroups', 'mod_dictogloss')];
         foreach (groups_get_all_groups($this->course->id, 0, (int) $groupingid, 'g.id, g.name') as $group) {
-            $options[(int) $group->id] = format_string($group->name);
+            $options[(int) $group->id] = $group->name;
         }
         return $options;
     }

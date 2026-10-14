@@ -192,6 +192,7 @@ class renderer extends \plugin_renderer_base {
 
             $hasanchor = ($slot['anchor'] !== null);
             $anchortokens = $hasanchor ? word_diff::sentence_tokens((string) $slot['anchor']) : [];
+            $anchorset = $hasanchor ? word_diff::token_set((string) $slot['anchor']) : [];
 
             $options = [];
             $optionindex = 0;
@@ -218,7 +219,7 @@ class renderer extends \plugin_renderer_base {
                 $options[] = [
                     'optionindex' => $optionindex,
                     'words' => ($hasanchor)
-                        ? word_diff::segments((string) $option['text'], word_diff::token_set((string) $slot['anchor']),
+                        ? word_diff::segments((string) $option['text'], $anchorset,
                             'matched', 'extra')
                         : word_diff::segments((string) $option['text'], [], 'plain', 'plain'),
                     'count' => $count,
@@ -270,7 +271,7 @@ class renderer extends \plugin_renderer_base {
         return $this->render_from_template('mod_dictogloss/audio_player', [
             'label' => $label,
             'intro' => $intro,
-            'hassintro' => ($intro !== ''),
+            'hasintro' => ($intro !== ''),
             'classes' => $classes,
             'urls' => $urls,
         ]);
@@ -290,6 +291,18 @@ class renderer extends \plugin_renderer_base {
     public function render_peers(array $peers, $owntext, $ownuserid, $threshold, $allowcopy,
             $shownames = false): string {
         $ownset = word_diff::token_set((string) $owntext);
+
+        // Accessible labels for each word status (colour/weight alone is not accessible).
+        $wordlabels = [
+            'have' => get_string('peerhave', 'mod_dictogloss'),
+            'new' => get_string('peernew', 'mod_dictogloss'),
+        ];
+        $decoratewords = static function (array $words) use ($wordlabels): array {
+            foreach ($words as $index => $word) {
+                $words[$index]['label'] = $wordlabels[$word['status']] ?? '';
+            }
+            return $words;
+        };
 
         // Build display labels: own, real name, or an anonymous letter.
         $labels = [];
@@ -330,7 +343,7 @@ class renderer extends \plugin_renderer_base {
                 }
                 $options[] = [
                     'text' => $option['text'],
-                    'words' => word_diff::segments($option['text'], $ownset, 'have', 'new'),
+                    'words' => $decoratewords(word_diff::segments($option['text'], $ownset, 'have', 'new')),
                     'count' => $option['count'],
                     'isown' => $isown,
                 ];
@@ -353,7 +366,7 @@ class renderer extends \plugin_renderer_base {
             foreach (word_diff::split_sentences($peer['text']) as $sentence) {
                 $sentences[] = [
                     'text' => $sentence,
-                    'words' => word_diff::segments($sentence, $ownset, 'have', 'new'),
+                    'words' => $decoratewords(word_diff::segments($sentence, $ownset, 'have', 'new')),
                 ];
             }
             $fulltexts[] = [
@@ -378,6 +391,8 @@ class renderer extends \plugin_renderer_base {
             'ownlabel' => get_string('peerown', 'mod_dictogloss'),
             'additionallabel' => get_string('variantsadditional', 'mod_dictogloss'),
             'empty' => get_string('peersnone', 'mod_dictogloss'),
+            'legendhavelabel' => get_string('peerhave', 'mod_dictogloss'),
+            'legendnewlabel' => get_string('peernew', 'mod_dictogloss'),
         ]);
     }
 
