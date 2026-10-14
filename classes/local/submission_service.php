@@ -116,7 +116,9 @@ class submission_service {
             }
             throw $e;
         }
-        return $submission;
+        // Re-read the row so the returned object contains every column: event snapshots
+        // (add_record_snapshot) require the full field list to match the table schema.
+        return $this->get_submission($userid) ?: $submission;
     }
 
     /**

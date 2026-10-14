@@ -127,6 +127,14 @@ Stage gates are enforced server-side in `autosave_handler` and in the `view.php`
 `keywords` are frozen once reconstruction starts, `reconstruction` once it is submitted (or while
 it is held), and `followup` only after submission.
 
+Audio access is gated server-side too: `state_service::can_listen($userid)` mirrors the
+audio-player visibility (teachers always; otherwise the stage/settings, including the live
+`replayopen` override). `dictogloss_pluginfile()` denies the `audio` area when it returns false and
+serves it with `cache = 0` (no client cache), `view.php` is marked `set_cacheable(false)` so the
+back button re-renders the current stage, and the `mod_dictogloss/audiolock` AMD module re-checks
+via `mod_dictogloss_can_listen` on tab focus/visibility and on each `play` attempt (each tab
+checks independently, so it also works across browsers).
+
 ### External functions (AJAX)
 
 The browser talks to the server through Moodle external functions (`db/services.php` +
@@ -138,6 +146,7 @@ scripts and no sesskey in the URL. `core/ajax` supplies the sesskey and serialis
 | `mod_dictogloss_save_field` | `external\save_field` | write | Autosave one field (`keywords`/`reconstruction`/`followup`/`played`). |
 | `mod_dictogloss_get_wordcloud` | `external\get_wordcloud` | read | Return the re-rendered word cloud section. |
 | `mod_dictogloss_get_peers` | `external\get_peers` | read | Return the group-reconstructions panel. |
+| `mod_dictogloss_can_listen` | `external\can_listen` | read | Whether the current user may play the recording. |
 
 Each function validates parameters, checks the module context and `mod/dictogloss:submit`, and
 delegates to the same domain handler used elsewhere. `get_wordcloud`/`get_peers` currently return
@@ -162,6 +171,7 @@ by the mobile app.
 | `notebook` | Debounced autosave for the notes/reconstruction/follow-up text areas. |
 | `wordcloud` | Refresh the word cloud section without a page reload. |
 | `peers` | Pull the group reconstructions, tab switching, "Add" buttons, copy guard. |
+| `audiolock` | Re-check listening permission on focus/visibility and on play; tear down the player. |
 | `confirm` | Confirmation dialogs for destructive actions. |
 | `colour` | Toggle the colour-coded rewrite view. |
 | `variants` | Focus/behaviour helpers for the variants overview. |

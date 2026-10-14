@@ -549,6 +549,17 @@ function dictogloss_pluginfile($course, $cm, $context, $filearea, $args, $forced
         }
     }
 
+    // The recording is only served while the learner is allowed to listen to it.
+    if ($filearea === 'audio') {
+        $instance = $DB->get_record('dictogloss', ['id' => $cm->instance]);
+        if ($instance) {
+            $activity = new \mod_dictogloss\activity($cm, $course, $instance);
+            if (!$activity->state()->can_listen($USER->id)) {
+                return false;
+            }
+        }
+    }
+
     $itemid = (int) array_shift($args);
     $filename = array_pop($args);
     $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
@@ -559,5 +570,7 @@ function dictogloss_pluginfile($course, $cm, $context, $filearea, $args, $forced
         return false;
     }
 
-    send_stored_file($file, 86400, 0, $forcedownload, $options);
+    // The recording is not client-cached so access is re-checked on every request.
+    $cache = ($filearea === 'audio') ? 0 : 86400;
+    send_stored_file($file, $cache, 0, $forcedownload, $options);
 }

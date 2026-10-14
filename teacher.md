@@ -120,6 +120,11 @@ The standard Moodle **Common module settings**, **Grade** and **Completion** sec
 
 Drafts are autosaved as they type; a normal form submission also works if JavaScript is disabled.
 
+Once learners move on from the listening stage, the recording is locked (unless *Allow listening
+again during reconstruction* is on or you open listening live from **Live controls**). This is
+enforced on the server, so it also applies if a learner tries to reach the recording again with
+the browser's back button or another browser window.
+
 ### Live controls
 
 Teachers with the *Manage* capability see a **Live controls** tab (when at least one control

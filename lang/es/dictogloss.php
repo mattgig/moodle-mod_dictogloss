@@ -189,6 +189,7 @@ $string['privacy:path:graded'] = 'Entregas calificadas';
 $string['privacy:path:wordoverrides'] = 'Moderación de la nube de palabras';
 $string['reconstruction'] = 'Reconstruye el texto';
 $string['reconstruction_help'] = 'Usa las palabras clave y las notas que anotaste para reconstruir el texto con la mayor precisión posible.';
+$string['reconstructionpending_nolisten'] = 'Tu profesor abrirá la reconstrucción en breve. Mientras tanto, puedes revisar la nube de palabras.';
 $string['reconstructionpending'] = 'Tu profesor abrirá la reconstrucción en breve. Mientras tanto, puedes escuchar la grabación y revisar la nube de palabras.';
 $string['refreshwordcloud'] = 'Actualizar la nube de palabras';
 $string['refreshing'] = 'Actualizando...';

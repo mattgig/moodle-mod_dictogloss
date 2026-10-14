@@ -67,6 +67,9 @@ $PAGE->set_url('/mod/dictogloss/view.php', ['id' => $cm->id]);
 $PAGE->set_title($course->shortname . ': ' . format_string($instance->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($context);
+// The stage (and audio availability) can change at any time; do not serve the page from
+// cache/back-forward cache so the browser always renders the current state.
+$PAGE->set_cacheable(false);
 // Register the activity record so the activity header renders the name and intro.
 $PAGE->set_activity_record($instance);
 $PAGE->requires->js_call_amd('mod_dictogloss/confirm', 'init');
@@ -130,6 +133,9 @@ if ($canedit) {
         'refreshing' => get_string('refreshing', 'mod_dictogloss'),
         'waitlabel' => get_string('peerscooldown', 'mod_dictogloss', '{$a}'),
     ]]);
+    if ($audiofiles) {
+        $PAGE->requires->js_call_amd('mod_dictogloss/audiolock', 'init', [['cmid' => $cm->id]]);
+    }
 }
 
 // Determine the current stage.
@@ -340,9 +346,12 @@ if ($stage === 'keywords' && !empty($instance->shownotes)) {
     }
 
     if ($canedit && !$activity->state()->is_reconstruction_open()) {
-        // The teacher is holding the reconstruction; listening/reviewing still allowed.
-        echo $OUTPUT->render(new \core\output\notification(
-        get_string('reconstructionpending', 'mod_dictogloss'), \core\output\notification::NOTIFY_INFO));
+        // The teacher is holding the reconstruction; listening/reviewing remains available only
+        // when replay is currently allowed, so word the notice accordingly.
+        $pendingmsg = $activity->state()->can_listen($viewuserid)
+            ? get_string('reconstructionpending', 'mod_dictogloss')
+            : get_string('reconstructionpending_nolisten', 'mod_dictogloss');
+        echo $OUTPUT->render(new \core\output\notification($pendingmsg, \core\output\notification::NOTIFY_INFO));
     } else if ($canedit && $reconstructionform) {
         echo html_writer::start_div('mod-dictogloss-formwrapper mt-4');
         $reconstructionform->display();

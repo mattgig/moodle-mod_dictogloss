@@ -128,6 +128,48 @@ class state_service {
     }
 
     /**
+     * Whether the given user may currently play the audio recording.
+     *
+     * Mirrors the audio-player visibility in view.php and is used to authorise
+     * access to the audio file area in dictogloss_pluginfile().
+     *
+     * @param int|null $userid The user id (defaults to the current user).
+     * @return bool
+     */
+    public function can_listen($userid = null): bool {
+        global $USER;
+        if ($userid === null) {
+            $userid = $USER->id;
+        }
+
+        // Teachers may always preview the recording.
+        if (has_capability('mod/dictogloss:manage', $this->activity->get_context())) {
+            return true;
+        }
+
+        $submission = $this->activity->submissions()->get_submission($userid);
+        $status = $submission ? (int) $submission->status : activity::STATUS_NOTSTARTED;
+
+        // No listening once the contribution has been submitted (comparison/rewriting stage).
+        if ($status >= activity::STATUS_SUBMITTED) {
+            return false;
+        }
+
+        // Initial listening / keyword-notes stage.
+        if ($status < activity::STATUS_KEYWORDS) {
+            return !empty($this->instance->shownotes) || $this->is_replay_available();
+        }
+
+        // Separate "listen again" step, before the student starts reconstructing.
+        if (!empty($this->instance->replaystage)) {
+            return empty($submission->timereconstructionready);
+        }
+
+        // During (and after) reconstruction only if replay is explicitly allowed/opened.
+        return $this->is_replay_available();
+    }
+
+    /**
      * Mark that the student has finished the "listen again" step and is ready to reconstruct.
      *
      * @param int|null $userid The user id.

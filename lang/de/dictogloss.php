@@ -189,6 +189,7 @@ $string['privacy:path:graded'] = 'Bewertete Abgaben';
 $string['privacy:path:wordoverrides'] = 'Wortwolken-Moderation';
 $string['reconstruction'] = 'Den Text rekonstruieren';
 $string['reconstruction_help'] = 'Verwenden Sie die Schlüsselwörter und Notizen, die Sie aufgeschrieben haben, um den Text so genau wie möglich zu rekonstruieren.';
+$string['reconstructionpending_nolisten'] = 'Ihre Lehrkraft öffnet die Rekonstruktion in Kürze. In der Zwischenzeit können Sie die Wortwolke ansehen.';
 $string['reconstructionpending'] = 'Ihre Lehrkraft wird die Rekonstruktion in Kürze öffnen. In der Zwischenzeit können Sie die Aufnahme anhören und die Wortwolke ansehen.';
 $string['refreshwordcloud'] = 'Wortwolke aktualisieren';
 $string['refreshing'] = 'Wird aktualisiert …';

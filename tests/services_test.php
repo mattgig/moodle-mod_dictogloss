@@ -221,4 +221,70 @@ final class services_test extends \advanced_testcase {
         $activity->submissions()->reopen_submission($user->id);
         $this->assertEquals(COMPLETION_INCOMPLETE, $completion->get_state('completionsubmit'));
     }
+
+    /**
+     * The audio listening permission mirrors the stage/settings.
+     */
+    public function test_can_listen() {
+        // Default: listening stage (no notes yet) -> allowed.
+        list($activity, $user) = $this->setup_activity(['shownotes' => 1]);
+        $this->assertTrue($activity->state()->can_listen($user->id));
+
+        // Notes saved, no replay option -> not allowed.
+        $activity->submissions()->save_keywords('alpha beta', $user->id);
+        $this->assertFalse($activity->state()->can_listen($user->id));
+
+        // Replay during reconstruction (automatic) -> allowed.
+        list($replay, $replayuser) = $this->setup_activity(['allowaudioreplay' => 1]);
+        $replay->submissions()->save_keywords('alpha', $replayuser->id);
+        $replay->submissions()->save_reconstruction('alpha text', $replayuser->id);
+        $this->assertTrue($replay->state()->can_listen($replayuser->id));
+
+        // The live replay override behaves the same even without the static setting.
+        list($live, $liveuser) = $this->setup_activity();
+        $live->submissions()->save_keywords('alpha', $liveuser->id);
+        $live->submissions()->save_reconstruction('alpha', $liveuser->id);
+        $this->assertFalse($live->state()->can_listen($liveuser->id));
+        $live->state()->set_replay_open(true);
+        $this->assertTrue($live->state()->can_listen($liveuser->id));
+
+        // Submitted -> never allowed.
+        $replay->submissions()->submit_reconstruction($replayuser->id);
+        $this->assertFalse($replay->state()->can_listen($replayuser->id));
+
+        // Separate "listen again" step: allowed until the student starts reconstructing.
+        list($stage, $stageuser) = $this->setup_activity(['replaystage' => 1]);
+        $stage->submissions()->save_keywords('alpha', $stageuser->id);
+        $this->assertTrue($stage->state()->can_listen($stageuser->id));
+        $stage->state()->mark_reconstruction_ready($stageuser->id);
+        $this->assertFalse($stage->state()->can_listen($stageuser->id));
+
+        // Teachers may always listen.
+        $teacher = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($teacher->id, $activity->get_course()->id, 'editingteacher');
+        $this->setUser($teacher);
+        $this->assertTrue($activity->state()->can_listen($user->id));
+    }
+
+    /**
+     * Saving an empty field on a brand-new submission must not raise an event-snapshot warning.
+     */
+    public function test_empty_first_save_snapshot() {
+        list($activity, $user) = $this->setup_activity();
+        $this->setUser($user);
+
+        $this->resetDebugging();
+        $activity->submissions()->save_keywords('', $user->id);
+        $this->assertDebuggingNotCalled();
+
+        // Reconstruction on the (now existing) submission.
+        $this->resetDebugging();
+        $activity->submissions()->save_reconstruction('', $user->id);
+        $this->assertDebuggingNotCalled();
+
+        // Follow-up rewrite.
+        $this->resetDebugging();
+        $activity->submissions()->save_followup('', $user->id);
+        $this->assertDebuggingNotCalled();
+    }
 }

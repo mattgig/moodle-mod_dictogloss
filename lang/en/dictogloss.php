@@ -189,6 +189,7 @@ $string['privacy:path:graded'] = 'Graded submissions';
 $string['privacy:path:wordoverrides'] = 'Word cloud moderation';
 $string['reconstruction'] = 'Reconstruct the text';
 $string['reconstruction_help'] = 'Use the keywords and notes you wrote down to reconstruct the text as accurately as possible.';
+$string['reconstructionpending_nolisten'] = 'Your teacher will open the reconstruction shortly. In the meantime you can review the word cloud.';
 $string['reconstructionpending'] = 'Your teacher will open the reconstruction shortly. In the meantime you can listen to the recording and review the word cloud.';
 $string['refreshwordcloud'] = 'Refresh word cloud';
 $string['refreshing'] = 'Refreshing...';

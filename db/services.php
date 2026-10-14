@@ -43,4 +43,10 @@ $functions = [
         'type' => 'read',
         'ajax' => true,
     ],
+    'mod_dictogloss_can_listen' => [
+        'classname' => 'mod_dictogloss\external\can_listen',
+        'description' => 'Report whether the current user may play the audio recording.',
+        'type' => 'read',
+        'ajax' => true,
+    ],
 ];

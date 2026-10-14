@@ -189,6 +189,7 @@ $string['privacy:path:graded'] = 'Remises notées';
 $string['privacy:path:wordoverrides'] = 'Modération du nuage de mots';
 $string['reconstruction'] = 'Reconstruisez le texte';
 $string['reconstruction_help'] = 'Utilisez les mots-clés et les notes que vous avez écrits pour reconstruire le texte le plus fidèlement possible.';
+$string['reconstructionpending_nolisten'] = 'Votre enseignant ouvrira bientôt la reconstruction. En attendant, vous pouvez consulter le nuage de mots.';
 $string['reconstructionpending'] = 'Votre enseignant ouvrira bientôt la reconstruction. En attendant, vous pouvez écouter l\'enregistrement et consulter le nuage de mots.';
 $string['refreshwordcloud'] = 'Actualiser le nuage de mots';
 $string['refreshing'] = 'Actualisation...';

@@ -189,6 +189,7 @@ $string['privacy:path:graded'] = '已评分的提交';
 $string['privacy:path:wordoverrides'] = '词云审核';
 $string['reconstruction'] = '重构文本';
 $string['reconstruction_help'] = '使用你写下的关键词和笔记，尽可能准确地重构文本。';
+$string['reconstructionpending_nolisten'] = '你的教师很快会开放重构。在此期间，你可以查看词云。';
 $string['reconstructionpending'] = '你的教师很快会开放重构。在此期间，你可以收听录音并查看词云。';
 $string['refreshwordcloud'] = '刷新词云';
 $string['refreshing'] = '正在刷新...';
