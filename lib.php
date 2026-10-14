@@ -121,6 +121,37 @@ function dictogloss_process_files(stdClass $data, $coursemodule) {
 }
 
 /**
+ * Return the course module information used by the completion subsystem.
+ *
+ * @param stdClass $coursemodule The course module record.
+ * @return cached_cm_info|false The course module info.
+ */
+function dictogloss_get_coursemodule_info($coursemodule) {
+    global $DB;
+
+    $fields = 'id, name, intro, introformat, completionsubmit';
+    $dictogloss = $DB->get_record('dictogloss', ['id' => $coursemodule->instance], $fields);
+    if (!$dictogloss) {
+        return false;
+    }
+
+    $result = new cached_cm_info();
+    $result->name = $dictogloss->name;
+
+    if ($coursemodule->showdescription) {
+        // Cached content is not filtered; filters run at display time.
+        $result->content = format_module_intro('dictogloss', $dictogloss, $coursemodule->id, false);
+    }
+
+    // Expose the custom completion rule so it can be evaluated and described.
+    if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
+        $result->customdata['customcompletionrules']['completionsubmit'] = $dictogloss->completionsubmit;
+    }
+
+    return $result;
+}
+
+/**
  * Add a new Dictogloss instance.
  *
  * @param stdClass $data The form data.
@@ -363,31 +394,7 @@ function dictogloss_reset_userdata($data) {
 }
 
 /**
- * Determine the completion state for a user.
- *
- * @param stdClass $course The course.
- * @param stdClass $cm The course module.
- * @param int $userid The user id.
- * @param bool $type The completion type.
- * @return bool
- */
-function dictogloss_get_completion_state($course, $cm, $userid, $type) {
-    global $DB;
-
-    $dictogloss = $DB->get_record('dictogloss', ['id' => $cm->instance], '*', MUST_EXIST);
-
-    if (!empty($dictogloss->completionsubmit)) {
-        $submission = $DB->get_record('dictogloss_submissions',
-            ['dictogloss' => $dictogloss->id, 'userid' => $userid]);
-        return $submission && $submission->status >= \mod_dictogloss\activity::STATUS_FINALISED;
-    }
-
-    return $type;
-}
-
-/**
  * Return a small summary of a user's activity for the grade user report.
- *
  * @param stdClass $course The course.
  * @param stdClass $user The user.
  * @param stdClass $mod The course module.

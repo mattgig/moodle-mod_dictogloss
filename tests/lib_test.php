@@ -22,19 +22,34 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_dictogloss;
+
+use mod_dictogloss\diff\word_diff;
+use mod_dictogloss\overview\sentence_clusterer;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/dictogloss/lib.php');
 
-use mod_dictogloss\activity;
-use mod_dictogloss\diff\word_diff;
-use mod_dictogloss\overview\sentence_clusterer;
-
 /**
  * Test cases for the Dictogloss module.
+ *
+ * @package    mod_dictogloss
+ * @copyright  2026 Dictogloss contributors
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \mod_dictogloss\activity
+ * @covers     \mod_dictogloss\local\submission_service
+ * @covers     \mod_dictogloss\local\wordcloud_service
+ * @covers     \mod_dictogloss\local\peer_service
+ * @covers     \mod_dictogloss\local\random_service
+ * @covers     \mod_dictogloss\local\state_service
+ * @covers     \mod_dictogloss\local\grader
+ * @covers     \mod_dictogloss\local\overview_service
+ * @covers     \mod_dictogloss\diff\word_diff
+ * @covers     \mod_dictogloss\overview\sentence_clusterer
  */
-class mod_dictogloss_lib_testcase extends advanced_testcase {
+final class lib_test extends \advanced_testcase {
 
     /**
      * Set up the test.

@@ -117,7 +117,11 @@ class peer_service {
      */
     public function mark_peers_pulled($userid = null): void {
         global $DB;
-        $submission = $this->activity->submissions()->ensure_submission($userid);
+        $submission = $this->activity->submissions()->get_submission($userid);
+        if (!$submission) {
+            // Only record a pull for users who already have a contribution (never create rows).
+            return;
+        }
         $now = time();
         $count = (int) $submission->peerpullcount + 1;
         $DB->update_record('dictogloss_submissions', (object) [

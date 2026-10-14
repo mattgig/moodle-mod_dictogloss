@@ -170,10 +170,16 @@ class overview_service {
      * Return the summary statistics for the results page.
      *
      * @param int $groupid Optional group filter.
+     * @param array|null $userids Optional explicit list of user ids (takes precedence; [] means none).
      * @return array ['enrolled', 'notstarted', 'inprogress', 'submitted', 'finalised', 'average'].
      */
-    public function get_results_stats($groupid = 0): array {
+    public function get_results_stats($groupid = 0, $userids = null): array {
         global $DB;
+
+        if ($userids !== null && !$userids) {
+            return ['enrolled' => 0, 'notstarted' => 0, 'inprogress' => 0,
+                'submitted' => 0, 'finalised' => 0, 'average' => null];
+        }
 
         $courseid = $this->activity->get_course()->id;
         $params = ['courseid' => $courseid];
@@ -181,12 +187,16 @@ class overview_service {
             JOIN {user_enrolments} ue ON ue.userid = u.id
             JOIN {enrol} e ON e.id = ue.enrolid AND e.courseid = :courseid";
         $where = "u.deleted = 0 AND ue.status = 0";
-        $groupclause = "";
-        if ($groupid) {
-            $groupclause = " AND u.id IN (SELECT gm.userid FROM {groups_members} gm WHERE gm.groupid = :groupid)";
+        $scopeclause = "";
+        if ($userids !== null) {
+            list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'vis');
+            $scopeclause = " AND u.id $insql";
+            $params = array_merge($params, $inparams);
+        } else if ($groupid) {
+            $scopeclause = " AND u.id IN (SELECT gm.userid FROM {groups_members} gm WHERE gm.groupid = :groupid)";
             $params['groupid'] = $groupid;
         }
-        $enrolled = (int) $DB->count_records_sql("SELECT COUNT(DISTINCT u.id) FROM $from WHERE $where $groupclause", $params);
+        $enrolled = (int) $DB->count_records_sql("SELECT COUNT(DISTINCT u.id) FROM $from WHERE $where $scopeclause", $params);
 
         // One grouped query provides both the per-status counts and the grade aggregate.
         $sparams = ['dictoglossid' => $this->instance->id];
@@ -196,7 +206,11 @@ class overview_service {
                              SUM(CASE WHEN s.grade IS NOT NULL THEN 1 ELSE 0 END) AS gradecount
                         FROM {dictogloss_submissions} s
                        WHERE s.dictogloss = :dictoglossid";
-        if ($groupid) {
+        if ($userids !== null) {
+            list($sinsql, $sinparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'viss');
+            $statussql .= " AND s.userid $sinsql";
+            $sparams = array_merge($sparams, $sinparams);
+        } else if ($groupid) {
             $statussql .= self::group_scope_sql();
             $sparams['groupid'] = $groupid;
         }

@@ -511,7 +511,6 @@ class submission_service {
         $event = $class::create([
             'objectid' => $submission->id,
             'context' => $this->context,
-            'userid' => $submission->userid,
             'relateduserid' => $submission->userid,
             'other' => ['dictoglossid' => $this->instance->id],
         ]);

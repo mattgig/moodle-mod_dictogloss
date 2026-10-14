@@ -50,8 +50,9 @@ class results_table extends \table_sql {
      * @param \stdClass $instance The dictogloss instance.
      * @param int $groupid Optional group filter.
      * @param bool $bulk Whether to show the bulk-selection column (hidden when downloading).
+     * @param array|null $userids Optional explicit list of user ids (takes precedence; [] means none).
      */
-    public function __construct($uniqueid, $cm, $instance, $groupid = 0, $bulk = true) {
+    public function __construct($uniqueid, $cm, $instance, $groupid = 0, $bulk = true, $userids = null) {
         global $DB;
 
         parent::__construct($uniqueid);
@@ -65,7 +66,15 @@ class results_table extends \table_sql {
             JOIN {enrol} e ON e.id = ue.enrolid AND e.courseid = :courseid
             LEFT JOIN {dictogloss_submissions} s ON s.userid = u.id AND s.dictogloss = :dictoglossid";
         $where = "u.deleted = 0 AND ue.status = 0";
-        if ($groupid) {
+        if ($userids !== null) {
+            if (!$userids) {
+                $where .= " AND 1 = 0";
+            } else {
+                list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'rtu');
+                $where .= " AND u.id $insql";
+                $params = array_merge($params, $inparams);
+            }
+        } else if ($groupid) {
             $where .= " AND u.id IN (SELECT gm.userid FROM {groups_members} gm WHERE gm.groupid = :groupid)";
             $params['groupid'] = $groupid;
         }

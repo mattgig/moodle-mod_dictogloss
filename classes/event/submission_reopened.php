@@ -32,6 +32,14 @@ defined('MOODLE_INTERNAL') || die();
 class submission_reopened extends submission_base {
 
     /**
+     * Initialise the event data.
+     */
+    protected function init() {
+        parent::init();
+        $this->data['edulevel'] = self::LEVEL_TEACHING;
+    }
+
+    /**
      * Get the event name.
      *
      * @return string

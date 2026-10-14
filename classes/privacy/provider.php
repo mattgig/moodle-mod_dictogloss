@@ -102,6 +102,8 @@ class provider implements
                  WHERE d.id IN (
                            SELECT s.dictogloss FROM {dictogloss_submissions} s WHERE s.userid = :subuserid
                            UNION
+                           SELECT s.dictogloss FROM {dictogloss_submissions} s WHERE s.grader = :graderid
+                           UNION
                            SELECT rp.dictogloss FROM {dictogloss_randompartners} rp
                             WHERE rp.userid = :rpuserid OR rp.partnerid = :rppartnerid
                            UNION
@@ -112,6 +114,7 @@ class provider implements
             'contextlevel' => CONTEXT_MODULE,
             'modname' => 'dictogloss',
             'subuserid' => $userid,
+            'graderid' => $userid,
             'rpuserid' => $userid,
             'rppartnerid' => $userid,
             'wouserid' => $userid,
@@ -137,6 +140,10 @@ class provider implements
                   JOIN (
                           SELECT s.userid AS userid, s.dictogloss AS dictogloss
                             FROM {dictogloss_submissions} s
+                          UNION
+                          SELECT s.grader AS userid, s.dictogloss AS dictogloss
+                            FROM {dictogloss_submissions} s
+                           WHERE s.grader > 0
                           UNION
                           SELECT rp.userid AS userid, rp.dictogloss AS dictogloss
                             FROM {dictogloss_randompartners} rp
@@ -172,8 +179,10 @@ class provider implements
                       FROM {dictogloss_submissions} s
                       JOIN {dictogloss} d ON d.id = s.dictogloss
                       JOIN {course_modules} cm ON cm.instance = d.id
+                      JOIN {modules} m ON m.id = cm.module AND m.name = :modname
                      WHERE cm.id = :cmid AND s.userid = :userid";
             $submissions = $DB->get_records_sql($sql, [
+                'modname' => 'dictogloss',
                 'cmid' => $context->instanceid,
                 'userid' => $userid,
             ]);
@@ -200,8 +209,10 @@ class provider implements
                    FROM {dictogloss_randompartners} rp
                    JOIN {dictogloss} d ON d.id = rp.dictogloss
                    JOIN {course_modules} cm ON cm.instance = d.id
-                  WHERE cm.id = :cmid AND (rp.userid = :userid OR rp.partnerid = :userid)",
-                ['cmid' => $context->instanceid, 'userid' => $userid]);
+                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+                  WHERE cm.id = :cmid AND (rp.userid = :userid1 OR rp.partnerid = :userid2)",
+                ['modname' => 'dictogloss', 'cmid' => $context->instanceid,
+                    'userid1' => $userid, 'userid2' => $userid]);
             if ($partners) {
                 $partnerdata = [];
                 foreach ($partners as $partner) {
@@ -224,8 +235,9 @@ class provider implements
                    FROM {dictogloss_wordoverrides} wo
                    JOIN {dictogloss} d ON d.id = wo.dictogloss
                    JOIN {course_modules} cm ON cm.instance = d.id
+                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
                   WHERE cm.id = :cmid AND wo.moderatedby = :userid",
-                ['cmid' => $context->instanceid, 'userid' => $userid]);
+                ['modname' => 'dictogloss', 'cmid' => $context->instanceid, 'userid' => $userid]);
             if ($overrides) {
                 $overridedata = [];
                 foreach ($overrides as $override) {
@@ -255,9 +267,7 @@ class provider implements
         if ($context->contextlevel != CONTEXT_MODULE) {
             return;
         }
-        $dictoglossid = $DB->get_field_sql(
-            "SELECT d.id FROM {dictogloss} d JOIN {course_modules} cm ON cm.instance = d.id WHERE cm.id = ?",
-            [$context->instanceid]);
+        $dictoglossid = self::get_instance_id_for_context($context);
         if (!$dictoglossid) {
             return;
         }
@@ -300,15 +310,33 @@ class provider implements
         if ($context->contextlevel != CONTEXT_MODULE) {
             return;
         }
-        $dictoglossid = $DB->get_field_sql(
-            "SELECT d.id FROM {dictogloss} d JOIN {course_modules} cm ON cm.instance = d.id WHERE cm.id = ?",
-            [$context->instanceid]);
+        $dictoglossid = self::get_instance_id_for_context($context);
         if (!$dictoglossid) {
             return;
         }
         foreach ($userlist->get_userids() as $userid) {
             self::delete_user_data($dictoglossid, $userid);
         }
+    }
+
+    /**
+     * Resolve the Dictogloss instance id for a module context.
+     *
+     * A module constraint is included so a course module of another type that
+     * happens to share the instance id cannot match.
+     *
+     * @param \core\context\context $context The module context.
+     * @return int The instance id (0 if not found).
+     */
+    protected static function get_instance_id_for_context(\core\context\context $context): int {
+        global $DB;
+        return (int) $DB->get_field_sql(
+            "SELECT d.id
+               FROM {dictogloss} d
+               JOIN {course_modules} cm ON cm.instance = d.id
+               JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+              WHERE cm.id = :cmid",
+            ['modname' => 'dictogloss', 'cmid' => $context->instanceid]);
     }
 
     /**

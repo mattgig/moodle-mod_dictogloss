@@ -55,7 +55,11 @@ $returnurl = new moodle_url('/mod/dictogloss/results.php', ['id' => $cm->id, 'gr
 // Group filter options.
 $groupselect = $activity->scope()->get_group_filter_options((int) $cm->groupingid);
 
-$table = new \mod_dictogloss\table\results_table('mod-dictogloss-results', $cm, $instance, $groupfilter, empty($download));
+// Honour the separate-groups boundary for restricted teachers.
+$visibleuserids = $activity->scope()->get_visible_userids();
+
+$table = new \mod_dictogloss\table\results_table('mod-dictogloss-results', $cm, $instance, $groupfilter,
+    empty($download), $visibleuserids);
 $table->is_downloading($download, 'dictogloss-results', get_string('results', 'mod_dictogloss'));
 
 if (!$table->is_downloading()) {
@@ -64,7 +68,7 @@ if (!$table->is_downloading()) {
 
     $renderer = $PAGE->get_renderer('mod_dictogloss');
 
-    $stats = $activity->overview()->get_results_stats($groupfilter);
+    $stats = $activity->overview()->get_results_stats($groupfilter, $visibleuserids);
     $tiles = [
         ['label' => get_string('resultsenrolled', 'mod_dictogloss'), 'value' => $stats['enrolled']],
         ['label' => get_string('statusnotstarted', 'mod_dictogloss'), 'value' => $stats['notstarted']],

@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+import Ajax from 'core/ajax';
+
 export const init = (cfg) => {
     const button = document.getElementById(cfg.buttonid);
     const container = document.getElementById(cfg.containerid);
@@ -108,7 +110,7 @@ export const init = (cfg) => {
     container.addEventListener('copy', blockCopy);
     container.addEventListener('cut', blockCopy);
 
-    button.addEventListener('click', async (event) => {
+    button.addEventListener('click', (event) => {
         event.preventDefault();
         if (button.disabled) {
             return;
@@ -117,13 +119,10 @@ export const init = (cfg) => {
         button.disabled = true;
         button.innerHTML = cfg.refreshing;
 
-        const url = new URL(cfg.endpoint, window.location.origin);
-        url.searchParams.set('id', cfg.cmid);
-        url.searchParams.set('sesskey', cfg.sesskey);
-
-        try {
-            const response = await fetch(url.toString(), {headers: {'X-Requested-With': 'XMLHttpRequest'}});
-            const data = await response.json();
+        Ajax.call([{
+            methodname: 'mod_dictogloss_get_peers',
+            args: {cmid: cfg.cmid},
+        }])[0].then((data) => {
             if (data.ok) {
                 container.innerHTML = data.html;
                 const firsttab = container.querySelector('[data-dictogloss-peertab]');
@@ -145,9 +144,9 @@ export const init = (cfg) => {
                     button.innerHTML = label;
                 }
             }
-        } catch (error) {
+        }).catch(() => {
             button.disabled = false;
             button.innerHTML = label;
-        }
+        });
     });
 };

@@ -165,10 +165,55 @@ class scope_resolver {
      * @return array Group id => name, with 0 => "All groups".
      */
     public function get_group_filter_options($groupingid = 0): array {
+        global $CFG;
+        require_once($CFG->dirroot . '/group/lib.php');
+
+        $context = \core\context\module::instance($this->cm->id);
+        if (!has_capability('moodle/site:accessallgroups', $context)
+                && groups_get_activity_groupmode($this->cm, $this->course) == SEPARATEGROUPS) {
+            // Restricted teachers may only filter by the groups they can access.
+            $options = [];
+            foreach (groups_get_activity_allowed_groups($this->cm) as $group) {
+                $options[(int) $group->id] = format_string($group->name);
+            }
+            return $options;
+        }
+
         $options = [0 => get_string('allgroups', 'mod_dictogloss')];
         foreach (groups_get_all_groups($this->course->id, 0, (int) $groupingid, 'g.id, g.name') as $group) {
             $options[(int) $group->id] = format_string($group->name);
         }
         return $options;
+    }
+
+    /**
+     * Return the user ids the current viewer may see, or null when unrestricted.
+     *
+     * Implements the separate-groups boundary for teacher-facing lists: a user
+     * without moodle/site:accessallgroups only sees members of the groups they
+     * belong to in this activity.
+     *
+     * @return array|null A list of user ids, or null when there is no restriction.
+     */
+    public function get_visible_userids(): ?array {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/group/lib.php');
+
+        $context = \core\context\module::instance($this->cm->id);
+        if (has_capability('moodle/site:accessallgroups', $context)) {
+            return null;
+        }
+        if (groups_get_activity_groupmode($this->cm, $this->course) != SEPARATEGROUPS) {
+            return null;
+        }
+
+        $allowed = groups_get_activity_allowed_groups($this->cm);
+        if (!$allowed) {
+            return [];
+        }
+        $groupids = array_map('intval', array_keys($allowed));
+        list($insql, $params) = $DB->get_in_or_equal($groupids, SQL_PARAMS_QM);
+        return array_map('intval',
+            $DB->get_fieldset_select('groups_members', 'DISTINCT userid', "groupid $insql", $params));
     }
 }

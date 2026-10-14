@@ -301,9 +301,11 @@ class mod_dictogloss_mod_form extends moodleform_mod {
      */
     public function add_completion_rules() {
         $mform = $this->_form;
-        $mform->addElement('advcheckbox', 'completionsubmit', '',
+        $suffix = $this->get_suffix();
+        $elementname = 'completionsubmit' . $suffix;
+        $mform->addElement('advcheckbox', $elementname, '',
             get_string('completionsubmit', 'mod_dictogloss'));
-        return ['completionsubmit'];
+        return [$elementname];
     }
 
     /**
@@ -313,7 +315,7 @@ class mod_dictogloss_mod_form extends moodleform_mod {
      * @return bool
      */
     public function completion_rule_enabled($data) {
-        return !empty($data['completionsubmit']);
+        return !empty($data['completionsubmit' . $this->get_suffix()]);
     }
 
     /**

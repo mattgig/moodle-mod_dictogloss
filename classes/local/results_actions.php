@@ -47,7 +47,7 @@ class results_actions {
         }
 
         // These are destructive actions and must be POSTed.
-        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+        if (!data_submitted()) {
             return;
         }
 
@@ -58,11 +58,15 @@ class results_actions {
 
         $changed = 0;
         foreach ($selected as $targetuserid) {
+            $targetuserid = (int) $targetuserid;
+            if (!$activity->can_access_user($targetuserid)) {
+                continue;
+            }
             if ($action === 'reopenselected') {
-                if ($activity->submissions()->reopen_submission((int) $targetuserid)) {
+                if ($activity->submissions()->reopen_submission($targetuserid)) {
                     $changed++;
                 }
-            } else if ($activity->submissions()->delete_submission((int) $targetuserid)) {
+            } else if ($activity->submissions()->delete_submission($targetuserid)) {
                 $changed++;
             }
         }

@@ -104,6 +104,14 @@ class backup_dictogloss_activity_structure_step extends backup_activity_structur
         $randompartner->annotate_ids('user', 'userid');
         $randompartner->annotate_ids('user', 'partnerid');
 
+        // Random pool group/grouping references stored on the instance itself.
+        $dictogloss->annotate_ids('group', 'randomsharedgroupid');
+        $dictogloss->annotate_ids('group', 'wordcloudrandomgroupid');
+        $dictogloss->annotate_ids('group', 'peersrandomgroupid');
+        $dictogloss->annotate_ids('grouping', 'randomsharedgroupingid');
+        $dictogloss->annotate_ids('grouping', 'wordcloudrandomgroupingid');
+        $dictogloss->annotate_ids('grouping', 'peersrandomgroupingid');
+
         $dictogloss->annotate_files('mod_dictogloss', 'intro', null);
         $dictogloss->annotate_files('mod_dictogloss', 'instructions', null);
         $dictogloss->annotate_files('mod_dictogloss', 'source', null);

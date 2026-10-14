@@ -37,6 +37,7 @@ class submission_deleted extends submission_base {
     protected function init() {
         parent::init();
         $this->data['crud'] = 'd';
+        $this->data['edulevel'] = self::LEVEL_TEACHING;
     }
 
     /**

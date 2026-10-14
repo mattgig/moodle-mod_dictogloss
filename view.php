@@ -48,10 +48,19 @@ $context = \core\context\module::instance($cm->id);
 require_capability('mod/dictogloss:view', $context);
 
 $isteacher = has_capability('mod/dictogloss:manage', $context);
-$viewuserid = ($isteacher && $userid) ? (int) $userid : (int) $USER->id;
-$isown = ($viewuserid === (int) $USER->id);
 
 $activity = new activity($cm, $course, $instance);
+
+// Only teachers may view another user's contribution, and only within their group scope.
+$viewuserid = (int) $USER->id;
+if ($isteacher && $userid) {
+    if (!$activity->can_access_user((int) $userid)) {
+        throw new \moodle_exception('nopermissions', 'error', '',
+            get_string('viewcontribution', 'mod_dictogloss'));
+    }
+    $viewuserid = (int) $userid;
+}
+$isown = ($viewuserid === (int) $USER->id);
 
 // Page setup.
 $PAGE->set_url('/mod/dictogloss/view.php', ['id' => $cm->id]);
@@ -105,23 +114,17 @@ if (!$isown) {
 if ($canedit) {
     $PAGE->requires->js_call_amd('mod_dictogloss/notebook', 'init', [[
         'cmid' => $cm->id,
-        'sesskey' => sesskey(),
-        'endpoint' => (new moodle_url('/mod/dictogloss/autosave.php'))->out(false),
         'saving' => get_string('saving', 'mod_dictogloss'),
         'saved' => get_string('saved', 'mod_dictogloss'),
     ]]);
     $PAGE->requires->js_call_amd('mod_dictogloss/wordcloud', 'init', [[
         'cmid' => $cm->id,
-        'sesskey' => sesskey(),
-        'endpoint' => (new moodle_url('/mod/dictogloss/wordcloud.php'))->out(false),
         'buttonid' => 'mod-dictogloss-refresh-cloud',
         'containerid' => 'mod-dictogloss-wordcloud',
         'refreshing' => get_string('refreshing', 'mod_dictogloss'),
     ]]);
     $PAGE->requires->js_call_amd('mod_dictogloss/peers', 'init', [[
         'cmid' => $cm->id,
-        'sesskey' => sesskey(),
-        'endpoint' => (new moodle_url('/mod/dictogloss/peers.php'))->out(false),
         'buttonid' => 'mod-dictogloss-showpeers',
         'containerid' => 'mod-dictogloss-peers',
         'refreshing' => get_string('refreshing', 'mod_dictogloss'),
@@ -186,7 +189,7 @@ if ($canedit) {
         $keywordsform->set_data(['id' => $cm->id, 'keywords' => $submission ? $submission->keywords : '']);
     } else if ($stage === 'reconstruction' || ($stage === 'keywords' && empty($instance->shownotes))) {
         $reconstructionform = new reconstruction_form($PAGE->url);
-        if ($data = $reconstructionform->get_data()) {
+        if ($activity->state()->is_reconstruction_open() && ($data = $reconstructionform->get_data())) {
             $activity->submissions()->save_reconstruction($data->reconstruction, $viewuserid);
             if (!empty($data->submitreconstruction)) {
                 $activity->submissions()->submit_reconstruction($viewuserid);
@@ -223,20 +226,20 @@ $status = $submission ? (int) $submission->status : activity::STATUS_NOTSTARTED;
 $played = $submission && !empty($submission->timeplayed);
 $hasaudio = !empty($audiofiles);
 
-$listenDone = $hasaudio ? $played : ($status >= activity::STATUS_KEYWORDS);
-$notesDone = $status >= activity::STATUS_KEYWORDS;
-$reconDone = $status >= activity::STATUS_SUBMITTED;
-$comparisonDone = $status >= activity::STATUS_SUBMITTED;
-$rewriteDone = $submission && (!empty($submission->timefollowup) || !empty($submission->timefinalised));
+$listendone = $hasaudio ? $played : ($status >= activity::STATUS_KEYWORDS);
+$notesdone = $status >= activity::STATUS_KEYWORDS;
+$recondone = $status >= activity::STATUS_SUBMITTED;
+$comparisondone = $status >= activity::STATUS_SUBMITTED;
+$rewritedone = $submission && (!empty($submission->timefollowup) || !empty($submission->timefinalised));
 
 $stageitems = [
-    ['label' => get_string('stage_listening', 'mod_dictogloss'), 'done' => $listenDone],
-    ['label' => get_string('stage_keywords', 'mod_dictogloss'), 'done' => $notesDone],
-    ['label' => get_string('stage_reconstruction', 'mod_dictogloss'), 'done' => $reconDone],
-    ['label' => get_string('stage_comparison', 'mod_dictogloss'), 'done' => $comparisonDone],
+    ['label' => get_string('stage_listening', 'mod_dictogloss'), 'done' => $listendone],
+    ['label' => get_string('stage_keywords', 'mod_dictogloss'), 'done' => $notesdone],
+    ['label' => get_string('stage_reconstruction', 'mod_dictogloss'), 'done' => $recondone],
+    ['label' => get_string('stage_comparison', 'mod_dictogloss'), 'done' => $comparisondone],
 ];
 if (!empty($instance->allowfollowup)) {
-    $stageitems[] = ['label' => get_string('stage_rewriting', 'mod_dictogloss'), 'done' => $rewriteDone];
+    $stageitems[] = ['label' => get_string('stage_rewriting', 'mod_dictogloss'), 'done' => $rewritedone];
 }
 
 // The first step that is not complete yet is the one the student is working on.

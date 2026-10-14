@@ -58,6 +58,17 @@ if ($teamuserid) {
 }
 $monitoruserids = $peersrandom ? $peersuserids : ($wordcloudrandom ? $wordclouduserids : null);
 
+// Honour the separate-groups boundary: a restricted teacher only sees their groups' users.
+$visibleuserids = $activity->scope()->get_visible_userids();
+if ($visibleuserids !== null) {
+    $restrict = function ($ids) use ($visibleuserids) {
+        return ($ids === null) ? $visibleuserids : array_values(array_intersect($ids, $visibleuserids));
+    };
+    $wordclouduserids = $restrict($wordclouduserids);
+    $peersuserids = $restrict($peersuserids);
+    $monitoruserids = $restrict($monitoruserids);
+}
+
 $PAGE->set_url('/mod/dictogloss/report.php',
     ['id' => $cm->id, 'group' => $groupfilter, 'teamuser' => $teamuserid]);
 $PAGE->set_title($course->shortname . ': ' . format_string($instance->name));
@@ -79,7 +90,10 @@ if ($anyrandom) {
         'u.id, u.firstname, u.lastname, u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename',
         'u.lastname, u.firstname', 0, 0, true);
     foreach ($students as $student) {
-        $filteroptions[(int) $student->id] = s(fullname($student));
+        if ($visibleuserids !== null && !in_array((int) $student->id, $visibleuserids, true)) {
+            continue;
+        }
+        $filteroptions[(int) $student->id] = fullname($student);
     }
     $filtername = 'teamuser';
     $filtervalue = $teamuserid;

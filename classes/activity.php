@@ -224,6 +224,31 @@ class activity {
     }
 
     /**
+     * Whether the current user may view or manage the given user's contribution.
+     *
+     * Applies the activity group mode: in separate-groups mode a user without
+     * moodle/site:accessallgroups may only access members of their own groups.
+     * The caller is responsible for the capability check.
+     *
+     * @param int $userid The target user id.
+     * @return bool
+     */
+    public function can_access_user(int $userid): bool {
+        global $CFG;
+        require_once($CFG->dirroot . '/group/lib.php');
+
+        // The target must be a participant (or already have a contribution).
+        if (!is_enrolled($this->context, $userid, '', true)
+                && !$this->submissions()->get_submission($userid)) {
+            return false;
+        }
+        if (has_capability('moodle/site:accessallgroups', $this->context)) {
+            return true;
+        }
+        return groups_user_groups_visible($this->course, $userid, $this->cm);
+    }
+
+    /**
      * Return the audio files attached to the activity.
      *
      * @return array

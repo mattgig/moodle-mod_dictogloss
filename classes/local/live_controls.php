@@ -45,7 +45,7 @@ class live_controls {
      */
     public static function process(\mod_dictogloss\activity $activity, $instance, array $randomfeatures,
             array $showflags, \moodle_url $returnurl): void {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (!data_submitted()) {
             return;
         }
 

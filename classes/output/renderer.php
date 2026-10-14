@@ -412,7 +412,7 @@ class renderer extends \plugin_renderer_base {
         foreach ($contributors as $row) {
             $options[] = [
                 'value' => (int) $row['userid'],
-                'label' => s($row['fullname']),
+                'label' => $row['fullname'],
                 'selected' => ((int) $row['userid'] === (int) $viewuserid),
             ];
         }

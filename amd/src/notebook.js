@@ -21,6 +21,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+import Ajax from 'core/ajax';
+
 export const init = (cfg) => {
     const selector = 'textarea[name="keywords"], textarea[name="reconstruction"], textarea[name="followup"]';
     const textareas = document.querySelectorAll(selector);
@@ -38,24 +40,15 @@ export const init = (cfg) => {
         textarea.addEventListener('input', () => {
             window.clearTimeout(timer);
             status.textContent = cfg.saving;
-            timer = window.setTimeout(async () => {
-                const body = new URLSearchParams({
-                    id: cfg.cmid,
-                    field: textarea.name,
-                    value: textarea.value,
-                    sesskey: cfg.sesskey,
-                });
-                try {
-                    const response = await fetch(cfg.endpoint, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                        body: body.toString(),
-                    });
-                    const data = await response.json();
+            timer = window.setTimeout(() => {
+                Ajax.call([{
+                    methodname: 'mod_dictogloss_save_field',
+                    args: {cmid: cfg.cmid, field: textarea.name, value: textarea.value},
+                }])[0].then((data) => {
                     status.textContent = data.ok ? cfg.saved : '';
-                } catch (error) {
+                }).catch(() => {
                     status.textContent = '';
-                }
+                });
             }, 1200);
         });
     });
@@ -68,16 +61,10 @@ export const init = (cfg) => {
                 return;
             }
             reported = true;
-            const body = new URLSearchParams({
-                id: cfg.cmid,
-                field: 'played',
-                sesskey: cfg.sesskey,
-            });
-            fetch(cfg.endpoint, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: body.toString(),
-            }).catch(() => {
+            Ajax.call([{
+                methodname: 'mod_dictogloss_save_field',
+                args: {cmid: cfg.cmid, field: 'played'},
+            }])[0].catch(() => {
                 reported = false;
             });
         });

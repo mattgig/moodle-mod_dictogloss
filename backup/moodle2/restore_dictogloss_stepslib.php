@@ -64,6 +64,19 @@ class restore_dictogloss_activity_structure_step extends restore_activity_struct
 
         $data = (object) $data;
         $data->course = $this->get_courseid();
+
+        // Remap the random pool group/grouping references to the restored course.
+        foreach (['randomsharedgroupid', 'wordcloudrandomgroupid', 'peersrandomgroupid'] as $field) {
+            if (isset($data->$field)) {
+                $data->$field = $this->get_mappingid('group', $data->$field) ?: 0;
+            }
+        }
+        foreach (['randomsharedgroupingid', 'wordcloudrandomgroupingid', 'peersrandomgroupingid'] as $field) {
+            if (isset($data->$field)) {
+                $data->$field = $this->get_mappingid('grouping', $data->$field) ?: 0;
+            }
+        }
+
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
@@ -82,7 +95,11 @@ class restore_dictogloss_activity_structure_step extends restore_activity_struct
         $data = (object) $data;
         $oldid = $data->id;
         $data->dictogloss = $this->get_new_parentid('dictogloss');
-        $data->userid = $this->get_mappingid('user', $data->userid) ?: 0;
+        $data->userid = $this->get_mappingid('user', $data->userid);
+        if (empty($data->userid)) {
+            // The owning user was not included in the restore; skip this contribution.
+            return;
+        }
         $data->groupid = $this->get_mappingid('group', $data->groupid) ?: 0;
         $data->grader = $this->get_mappingid('user', $data->grader) ?: 0;
         $data->timekeywords = $this->apply_date_offset($data->timekeywords);
@@ -99,6 +116,12 @@ class restore_dictogloss_activity_structure_step extends restore_activity_struct
         }
         if (isset($data->timefinalised)) {
             $data->timefinalised = $this->apply_date_offset($data->timefinalised);
+        }
+        if (!isset($data->gradeoverridden)) {
+            $data->gradeoverridden = 0;
+        }
+        if (!isset($data->timegraded)) {
+            $data->timegraded = 0;
         }
         $data->timegraded = $this->apply_date_offset($data->timegraded);
         $data->timecreated = $this->apply_date_offset($data->timecreated);
@@ -119,6 +142,10 @@ class restore_dictogloss_activity_structure_step extends restore_activity_struct
         $data = (object) $data;
         $data->dictogloss = $this->get_new_parentid('dictogloss');
         $data->submissionid = $this->get_new_parentid('dictogloss_submission');
+        if (empty($data->submissionid)) {
+            // The parent contribution was skipped; skip its keyword tokens too.
+            return;
+        }
         $data->userid = $this->get_mappingid('user', $data->userid) ?: 0;
         $data->groupid = $this->get_mappingid('group', $data->groupid) ?: 0;
         $data->timecreated = $this->apply_date_offset($data->timecreated);

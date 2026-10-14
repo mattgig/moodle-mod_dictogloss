@@ -23,8 +23,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+import Ajax from 'core/ajax';
+
 export const init = (cfg) => {
-    document.addEventListener('click', async (event) => {
+    document.addEventListener('click', (event) => {
         const button = event.target.closest('#' + cfg.buttonid);
         if (!button) {
             return;
@@ -37,33 +39,29 @@ export const init = (cfg) => {
         button.disabled = true;
         button.innerHTML = cfg.refreshing;
 
-        const url = new URL(cfg.endpoint, window.location.origin);
-        url.searchParams.set('id', cfg.cmid);
-        url.searchParams.set('sesskey', cfg.sesskey);
-
-        try {
-            const response = await fetch(url.toString(), {headers: {'X-Requested-With': 'XMLHttpRequest'}});
-            if (response.ok) {
-                const container = document.getElementById(cfg.containerid);
-                if (container) {
-                    container.outerHTML = await response.text();
-                    const newsection = document.getElementById(cfg.containerid);
-                    if (newsection) {
-                        const heading = newsection.querySelector('h3');
-                        if (heading) {
-                            heading.setAttribute('tabindex', '-1');
-                            heading.focus();
-                        }
+        Ajax.call([{
+            methodname: 'mod_dictogloss_get_wordcloud',
+            args: {cmid: cfg.cmid},
+        }])[0].then((data) => {
+            const container = document.getElementById(cfg.containerid);
+            if (container) {
+                container.outerHTML = data.html;
+                const newsection = document.getElementById(cfg.containerid);
+                if (newsection) {
+                    const heading = newsection.querySelector('h3');
+                    if (heading) {
+                        heading.setAttribute('tabindex', '-1');
+                        heading.focus();
                     }
                 }
             }
-        } catch (error) {
+        }).catch(() => {
             // Keep the current cloud on failure.
-        } finally {
+        }).then(() => {
             const current = document.getElementById(cfg.buttonid);
             if (current) {
                 current.disabled = false;
             }
-        }
+        });
     });
 };

@@ -49,6 +49,10 @@ class view_actions {
         }
         require_sesskey();
         $targetuserid = required_param('userid', PARAM_INT);
+        if (!$activity->can_access_user($targetuserid)) {
+            redirect($returnurl, get_string('nopermissions', 'error', get_string('reopen', 'mod_dictogloss')),
+                null, \core\output\notification::NOTIFY_ERROR);
+        }
         $activity->submissions()->reopen_submission($targetuserid);
         redirect($returnurl, get_string('reopenedsuccess', 'mod_dictogloss'), null,
             \core\output\notification::NOTIFY_SUCCESS);

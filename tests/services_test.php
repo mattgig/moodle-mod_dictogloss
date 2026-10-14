@@ -22,18 +22,28 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_dictogloss;
+
+use mod_dictogloss\overview\sentence_clusterer;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/dictogloss/lib.php');
 
-use mod_dictogloss\activity;
-use mod_dictogloss\overview\sentence_clusterer;
-
 /**
- * Tests for the reveal/grade/submission services.
+ * Service-level tests for the Dictogloss module.
+ *
+ * @package    mod_dictogloss
+ * @copyright  2026 Dictogloss contributors
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \mod_dictogloss\activity
+ * @covers     \mod_dictogloss\local\submission_service
+ * @covers     \mod_dictogloss\local\state_service
+ * @covers     \mod_dictogloss\local\grader
+ * @covers     \mod_dictogloss\overview\sentence_clusterer
  */
-class mod_dictogloss_services_testcase extends advanced_testcase {
+final class services_test extends \advanced_testcase {
 
     /**
      * Set up the test.
@@ -72,13 +82,13 @@ class mod_dictogloss_services_testcase extends advanced_testcase {
         $activity->state()->set_revealed(true);
         $this->assertTrue($activity->state()->is_revealed($user->id));
 
-        list($onSubmit, $onSubmitUser) = $this->setup_activity([
+        list($onsubmit, $onsubmituser) = $this->setup_activity([
             'revealmode' => activity::REVEAL_ONSUBMIT,
         ]);
-        $this->assertFalse($onSubmit->state()->is_revealed($onSubmitUser->id));
-        $onSubmit->submissions()->save_reconstruction('A short text.', $onSubmitUser->id);
-        $onSubmit->submissions()->submit_reconstruction($onSubmitUser->id);
-        $this->assertTrue($onSubmit->state()->is_revealed($onSubmitUser->id));
+        $this->assertFalse($onsubmit->state()->is_revealed($onsubmituser->id));
+        $onsubmit->submissions()->save_reconstruction('A short text.', $onsubmituser->id);
+        $onsubmit->submissions()->submit_reconstruction($onsubmituser->id);
+        $this->assertTrue($onsubmit->state()->is_revealed($onsubmituser->id));
     }
 
     /**
@@ -154,24 +164,24 @@ class mod_dictogloss_services_testcase extends advanced_testcase {
      * Test the visible grade visibility rules.
      */
     public function test_visible_grade() {
-        list($onSubmit, $onSubmitUser) = $this->setup_activity([
+        list($onsubmit, $onsubmituser) = $this->setup_activity([
             'grade' => 100,
             'gradeshow' => activity::GRADE_ON_SUBMIT,
         ]);
-        $onSubmit->submissions()->save_reconstruction('Text.', $onSubmitUser->id);
-        $onSubmit->submissions()->submit_reconstruction($onSubmitUser->id);
-        $this->assertNotNull($onSubmit->submissions()->get_visible_grade($onSubmitUser->id));
+        $onsubmit->submissions()->save_reconstruction('Text.', $onsubmituser->id);
+        $onsubmit->submissions()->submit_reconstruction($onsubmituser->id);
+        $this->assertNotNull($onsubmit->submissions()->get_visible_grade($onsubmituser->id));
 
-        list($afterRelease, $user) = $this->setup_activity([
+        list($afterrelease, $user) = $this->setup_activity([
             'grade' => 100,
             'gradeshow' => activity::GRADE_AFTER_RELEASE,
             'revealmode' => activity::REVEAL_MANUAL,
         ]);
-        $afterRelease->submissions()->save_reconstruction('Text.', $user->id);
-        $afterRelease->submissions()->submit_reconstruction($user->id);
-        $this->assertNull($afterRelease->submissions()->get_visible_grade($user->id));
-        $afterRelease->state()->set_revealed(true);
-        $this->assertNotNull($afterRelease->submissions()->get_visible_grade($user->id));
+        $afterrelease->submissions()->save_reconstruction('Text.', $user->id);
+        $afterrelease->submissions()->submit_reconstruction($user->id);
+        $this->assertNull($afterrelease->submissions()->get_visible_grade($user->id));
+        $afterrelease->state()->set_revealed(true);
+        $this->assertNotNull($afterrelease->submissions()->get_visible_grade($user->id));
     }
 
     /**

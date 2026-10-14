@@ -110,9 +110,9 @@ foreach ($randomfeatures as $feature) {
     $teamrows = [];
     foreach ($teams as $team) {
         $teamrows[] = [
-            'fullname' => s($team['fullname']),
+            'fullname' => $team['fullname'],
             'partners' => $team['partners']
-                ? implode(', ', array_map('s', $team['partners']))
+                ? implode(', ', $team['partners'])
                 : get_string('randomnopartners', 'mod_dictogloss'),
         ];
     }

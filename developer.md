@@ -31,18 +31,17 @@ mod/dictogloss/
 │   ├── results.php         Results overview + bulk actions + export
 │   ├── flow.php            Live controls (on-the-spot switches, random teams)
 │   ├── grade.php           Single-user grade view
-│   ├── index.php           Course-level activity list
-│   ├── autosave.php        JSON autosave endpoint
-│   ├── wordcloud.php       JSON word-cloud refresh endpoint
-│   └── peers.php           JSON group-reconstructions endpoint
+│   └── index.php           Course-level activity list
 ├── classes/
 │   ├── activity.php        Aggregate root (lazy domain services)
+│   ├── external/           AJAX external functions (see below)
 │   ├── local/              Domain services and request handlers
 │   ├── output/renderer.php Component renderer
 │   ├── diff/word_diff.php  Tokenising, similarity and word-level diff
 │   ├── overview/sentence_clusterer.php  Sentence alignment/clustering
 │   ├── event/              Event classes
 │   ├── form/               moodleform subclasses
+│   ├── completion/custom_completion.php  Activity custom-completion rule(s)
 │   ├── table/results_table.php  table_sql for the results export/table
 │   ├── privacy/provider.php
 │   └── navigation/views/secondary.php  Secondary navigation view
@@ -108,8 +107,25 @@ Entry scripts stay thin and delegate to small handlers:
 | `report_actions` | `report.php` (moderation, deletion, reopen). |
 | `results_actions` | `results.php` (bulk delete/reopen). |
 | `live_controls` | `flow.php` (live switches, re-shuffle). |
-| `autosave_handler` | `autosave.php` (field autosave, gated by the current state). |
-| `peers_handler` | `peers.php` (build the group-reconstructions panel). |
+| `autosave_handler` | `external\save_field` (field autosave, gated by the current state). |
+| `peers_handler` | `external\get_peers` (build the group-reconstructions panel). |
+
+### External functions (AJAX)
+
+The browser talks to the server through Moodle external functions (`db/services.php` +
+`classes/external/`), called from AMD via `core/ajax` — there are no standalone endpoint
+scripts and no sesskey in the URL. `core/ajax` supplies the sesskey and serialises errors.
+
+| Function | Class | Type | Purpose |
+| --- | --- | --- | --- |
+| `mod_dictogloss_save_field` | `external\save_field` | write | Autosave one field (`keywords`/`reconstruction`/`followup`/`played`). |
+| `mod_dictogloss_get_wordcloud` | `external\get_wordcloud` | read | Return the re-rendered word cloud section. |
+| `mod_dictogloss_get_peers` | `external\get_peers` | read | Return the group-reconstructions panel. |
+
+Each function validates parameters, checks the module context and `mod/dictogloss:submit`, and
+delegates to the same domain handler used elsewhere. `get_wordcloud`/`get_peers` currently return
+rendered HTML; moving them to structured data plus client-side rendering would make them reusable
+by the mobile app.
 
 ### Output layer
 
@@ -234,6 +250,7 @@ export and deletion.
   - `diff_test.php` – pure unit tests for `word_diff` and the clusterer.
   - `services_test.php` – reveal modes, plain-source conversion, grader edge cases,
     finalise/reopen/delete, visible grade, clusterer "extra" bucket.
+  - `privacy/provider_test.php` – context discovery, export and deletion.
   - `generator/lib.php` – the data generator (`create_module('dictogloss', [...])`).
 - **Behat** (`tests/behat/`)
   - `behat_mod_dictogloss.php` – the `the following dictogloss activities exist` step.

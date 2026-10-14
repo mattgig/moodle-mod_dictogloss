@@ -48,7 +48,7 @@ class report_actions {
             $groupfilter, $wordclouduserids, \moodle_url $returnurl): void {
         global $DB, $USER;
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (!data_submitted()) {
             return;
         }
 
@@ -58,6 +58,11 @@ class report_actions {
         if ($action === 'deletesubmission') {
             require_sesskey();
             $targetuserid = required_param('userid', PARAM_INT);
+            if (!$activity->can_access_user($targetuserid)) {
+                redirect($returnurl,
+                    get_string('nopermissions', 'error', get_string('deletesubmission', 'mod_dictogloss')),
+                    null, \core\output\notification::NOTIFY_ERROR);
+            }
             $activity->submissions()->delete_submission($targetuserid);
             redirect($returnurl, get_string('submissiondeleted', 'mod_dictogloss'), null,
                 \core\output\notification::NOTIFY_SUCCESS);
@@ -69,7 +74,11 @@ class report_actions {
             $selected = optional_param_array('selected', [], PARAM_INT);
             $deleted = 0;
             foreach ($selected as $targetuserid) {
-                if ($activity->submissions()->delete_submission((int) $targetuserid)) {
+                $targetuserid = (int) $targetuserid;
+                if (!$activity->can_access_user($targetuserid)) {
+                    continue;
+                }
+                if ($activity->submissions()->delete_submission($targetuserid)) {
                     $deleted++;
                 }
             }
@@ -82,7 +91,7 @@ class report_actions {
         }
 
         // Delete selected keyword entries.
-        if (isset($_POST['deletewords'])) {
+        if (optional_param('deletewords', '', PARAM_RAW) !== '') {
             require_sesskey();
             $words = optional_param_array('selectedwords', [], PARAM_RAW);
             if (!$words) {
@@ -103,7 +112,7 @@ class report_actions {
         }
 
         // Handle word cloud moderation.
-        if (isset($_POST['savemoderation'])) {
+        if (optional_param('savemoderation', '', PARAM_RAW) !== '') {
             require_sesskey();
 
             $words = optional_param_array('word', [], PARAM_TEXT);

@@ -212,6 +212,18 @@ function xmldb_dictogloss_upgrade($oldversion) {
         $index = new xmldb_index('dictoglossfeatureuserpartner', XMLDB_INDEX_UNIQUE,
             ['dictogloss', 'feature', 'userid', 'partnerid']);
         if (!$dbman->index_exists($table, $index)) {
+            // Remove any duplicates created before the unique index existed, keeping the oldest row.
+            $duplicates = $DB->get_records_sql(
+                "SELECT MIN(id) AS keepid, dictogloss, feature, userid, partnerid
+                   FROM {dictogloss_randompartners}
+               GROUP BY dictogloss, feature, userid, partnerid
+                 HAVING COUNT(*) > 1");
+            foreach ($duplicates as $duplicate) {
+                $DB->delete_records_select('dictogloss_randompartners',
+                    'dictogloss = ? AND feature = ? AND userid = ? AND partnerid = ? AND id <> ?',
+                    [$duplicate->dictogloss, $duplicate->feature, $duplicate->userid,
+                        $duplicate->partnerid, $duplicate->keepid]);
+            }
             $dbman->add_index($table, $index);
         }
         upgrade_mod_savepoint(true, 2026100517, 'dictogloss');

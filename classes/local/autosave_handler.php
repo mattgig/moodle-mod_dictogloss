@@ -44,7 +44,8 @@ class autosave_handler {
 
         // No edits after the contribution has been handed in.
         $submission = $activity->submissions()->get_submission($USER->id);
-        if ($submission && (int) $submission->status >= \mod_dictogloss\activity::STATUS_FINALISED) {
+        $status = $submission ? (int) $submission->status : \mod_dictogloss\activity::STATUS_NOTSTARTED;
+        if ($status >= \mod_dictogloss\activity::STATUS_FINALISED) {
             return ['ok' => false, 'reason' => 'finalised'];
         }
 
@@ -54,9 +55,17 @@ class autosave_handler {
                 if (empty($instance->shownotes)) {
                     return ['ok' => false, 'reason' => 'off'];
                 }
+                if ($status >= \mod_dictogloss\activity::STATUS_SUBMITTED) {
+                    // Notes are frozen once the reconstruction has been submitted.
+                    return ['ok' => false, 'reason' => 'submitted'];
+                }
                 $activity->submissions()->save_keywords($value, $USER->id);
                 break;
             case 'reconstruction':
+                if ($status >= \mod_dictogloss\activity::STATUS_SUBMITTED) {
+                    // The reconstruction is frozen once it has been submitted (and the source revealed).
+                    return ['ok' => false, 'reason' => 'submitted'];
+                }
                 if (!$activity->state()->is_reconstruction_open()) {
                     return ['ok' => false, 'reason' => 'hold'];
                 }
@@ -65,6 +74,9 @@ class autosave_handler {
             case 'followup':
                 if (empty($instance->allowfollowup)) {
                     return ['ok' => false, 'reason' => 'off'];
+                }
+                if ($status < \mod_dictogloss\activity::STATUS_SUBMITTED) {
+                    return ['ok' => false, 'reason' => 'stage'];
                 }
                 $activity->submissions()->save_followup($value, $USER->id);
                 break;

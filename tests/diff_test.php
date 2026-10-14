@@ -22,15 +22,23 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace mod_dictogloss;
 
 use mod_dictogloss\diff\word_diff;
 use mod_dictogloss\overview\sentence_clusterer;
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
- * Test cases for word_diff and sentence_clusterer.
+ * Unit tests for the Dictogloss text-comparison helpers.
+ *
+ * @package    mod_dictogloss
+ * @copyright  2026 Dictogloss contributors
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \mod_dictogloss\diff\word_diff
+ * @covers     \mod_dictogloss\overview\sentence_clusterer
  */
-class mod_dictogloss_diff_testcase extends advanced_testcase {
+final class diff_test extends \advanced_testcase {
 
     /**
      * Tokenisation normalises case, trims apostrophes and drops punctuation.
